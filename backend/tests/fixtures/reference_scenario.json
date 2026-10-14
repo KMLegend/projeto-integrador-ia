@@ -1,0 +1,12 @@
+{
+  "budget_limit": "1000.00",
+  "cycle_weeks": 4,
+  "items": [
+    {"sku": "ARROZ-5KG",        "product": "Arroz 5kg",        "unit_price": "29.89", "stock_on_hand": 201, "forecast_weekly_demand": 42, "required_quantity": 0},
+    {"sku": "CAFE-500G",        "product": "Café 500g",        "unit_price": "18.78", "stock_on_hand": 192, "forecast_weekly_demand": 60, "required_quantity": 48},
+    {"sku": "DETERGENTE-500ML", "product": "Detergente 500ml", "unit_price": "3.07",  "stock_on_hand": 202, "forecast_weekly_demand": 39, "required_quantity": 0},
+    {"sku": "FEIJAO-1KG",       "product": "Feijão 1kg",       "unit_price": "9.55",  "stock_on_hand": 270, "forecast_weekly_demand": 46, "required_quantity": 0},
+    {"sku": "LEITE-UHT-1L",     "product": "Leite UHT 1L",     "unit_price": "5.86",  "stock_on_hand": 226, "forecast_weekly_demand": 81, "required_quantity": 98},
+    {"sku": "REFRIGERANTE-2L",  "product": "Refrigerante 2L",  "unit_price": "10.76", "stock_on_hand": 263, "forecast_weekly_demand": 65, "required_quantity": 0}
+  ]
+}

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apresentação PI IV — Etapas 03 e 04</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .slide { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+    .slide.active { display: flex; opacity: 1; }
+    .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen flex flex-col justify-between font-sans selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Navigation & Progress Bar -->
+  <header class="w-full border-b border-[var(--border)] bg-[var(--card)]/90 backdrop-blur-md sticky top-0 z-50 px-6 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="px-2.5 py-1 bg-indigo-600 text-white text-xs font-bold rounded-md uppercase tracking-wider">PI IV</span>
+        <h1 class="text-sm font-semibold truncate max-w-md">Gestão Preditiva de Estoque com IA</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="toggleNotesBtn" onclick="toggleNotes()" class="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--sidebar)] transition flex items-center gap-1.5 font-medium">
+          <span>🎙️</span> <span id="notesBtnText">Mostrar Notas</span>
+        </button>
+        <span id="slideCounter" class="text-xs font-mono text-[var(--muted-foreground)] bg-[var(--sidebar)] px-2.5 py-1 rounded-md">1 / 8</span>
+      </div>
+    </div>
+    <!-- Progress bar line -->
+    <div class="w-full bg-[var(--border)] h-1 absolute bottom-0 left-0">
+      <div id="progressBar" class="bg-indigo-600 h-1 transition-all duration-300 ease-out" style="width: 12.5%;"></div>
+    </div>
+  </header>
+
+  <!-- Main Slide Canvas -->
+  <main class="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10 flex flex-col justify-center">
+
+    <!-- SLIDE 1: Capa -->
+    <section class="slide active flex-col space-y-6" data-slide="1">
+      <div class="inline-flex items-center gap-2 text-indigo-500 font-semibold text-sm tracking-wide uppercase">
+        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+        Projeto Integrador IV · Gestão de TI com Ênfase em IA
+      </div>
+      <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+        Gestão Preditiva de Estoque com Inteligência Artificial
+      </h2>
+      <p class="text-xl text-[var(--muted-foreground)] max-w-2xl leading-relaxed">
+        Prova de Conceito integrada: da previsão supervisionada semanal com <strong class="text-[var(--foreground)]">Machine Learning Clássico</strong> à alocação orçamentária ótima com <strong class="text-[var(--foreground)]">Computação Evolutiva</strong>.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] shadow-sm">
+          <div class="text-xs text-[var(--muted-foreground)] font-medium">Etapa 02 · Fundamentos</div>
+          <div class="text-base font-bold mt-1">Dataset e 5 Features</div>
+          <p class="text-xs text-[var(--muted-foreground)] mt-1">Modelagem orientada ao negócio de varejo.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-indigo-500/40 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-500/10 rounded-full blur-xl"></div>
+          <div class="text-xs text-indigo-500 font-medium">Etapa 03 · Preditiva</div>
+          <div class="text-base font-bold mt-1">Regressão Linear</div>
+          <p class="text-xs text-[var(--muted-foreground)] mt-1">Mínimos quadrados, MAE = 4,76 unids e matriz de risco.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-emerald-500/40 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl"></div>
+          <div class="text-xs text-emerald-500 font-medium">Etapa 04 · Prescritiva</div>
+          <div class="text-base font-bold mt-1">Algoritmo Genético</div>
+          <p class="text-xs text-[var(--muted-foreground)] mt-1">Otimização da compra sob orçamento fixo de R$ 1.000.</p>
+        </div>
+      </div>
+
+      <div class="pt-6 border-t border-[var(--border)] flex flex-wrap items-center justify-between text-xs text-[var(--muted-foreground)]">
+        <div><strong>Equipe:</strong> Carlos Eduardo, Adryan Kevin, Eduardo Mendonça e Gabriel</div>
+        <div>Entrega: Setembro / 2026</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: Mudança de Eixo & Modelagem (Etapa 02) -->
+    <section class="slide flex-col space-y-6" data-slide="2">
+      <div class="flex items-center justify-between">
+        <span class="badge bg-amber-500/10 text-amber-600 border border-amber-500/20">Contexto & Dados</span>
+        <span class="text-xs text-[var(--muted-foreground)] font-mono">Etapa 02</span>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">O Problema Real e as 5 Features de Negócio</h2>
+      <p class="text-sm text-[var(--muted-foreground)]">
+        No PI IV o foco mudou para <strong>implementação técnica máxima e código executável</strong>. As variáveis foram criadas para responder ao dilema real: evitar o <em>custo de ruptura</em> (falta na prateleira) sem incorrer no <em>custo de excesso</em> (capital parado).
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-3">
+          <div class="p-3.5 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <span class="font-mono text-xs text-indigo-500 font-bold">1. estoque_atual</span>
+            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Saldo físico no depósito. Base para calcular o saldo de segurança.</p>
+          </div>
+          <div class="p-3.5 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <span class="font-mono text-xs text-indigo-500 font-bold">2. saidas_7_dias</span>
+            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Velocidade recente e imediata de consumo (curto prazo).</p>
+          </div>
+          <div class="p-3.5 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <span class="font-mono text-xs text-indigo-500 font-bold">3. saidas_30_dias</span>
+            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Comportamento médio e sazonalidade mensal (médio prazo).</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="p-3.5 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <span class="font-mono text-xs text-indigo-500 font-bold">4. preco</span>
+            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Elasticidade-preço: mede o impacto de oscilações no volume vendido.</p>
+          </div>
+          <div class="p-3.5 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <span class="font-mono text-xs text-indigo-500 font-bold">5. promocao (0 ou 1)</span>
+            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Gatilho que provoca picos temporários e anormais de consumo.</p>
+          </div>
+          <div class="p-3.5 rounded-lg bg-[var(--sidebar)] border border-dashed border-[var(--border)]">
+            <span class="font-semibold text-xs text-[var(--foreground)]">Cesta simulada (6 SKUs essenciais):</span>
+            <p class="text-xs text-[var(--muted-foreground)] mt-0.5">Café 500g, Arroz 5kg, Feijão 1kg, Leite UHT 1L, Detergente 500ml e Refrigerante 2L.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: Etapa 03 - Machine Learning Clássico -->
+    <section class="slide flex-col space-y-6" data-slide="3">
+      <div class="flex items-center justify-between">
+        <span class="badge bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">Machine Learning Clássico</span>
+        <span class="text-xs text-[var(--muted-foreground)] font-mono">Etapa 03 · Modelo</span>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">Por que Regressão Linear?</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div class="space-y-4">
+          <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+            <h3 class="text-sm font-bold text-indigo-500">1. Alvo Contínuo (Regressão)</h3>
+            <p class="text-xs text-[var(--muted-foreground)] mt-1 leading-relaxed">
+              O modelo prevê <code>demanda_futura</code> (unidades a vender em 7 dias). Diferente de uma classificação binária ("vai faltar sim/não"), a regressão fornece a grandeza exata para planejar compras.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+            <h3 class="text-sm font-bold text-indigo-500">2. Mínimos Quadrados e Transparência</h3>
+            <p class="text-xs text-[var(--muted-foreground)] mt-1 leading-relaxed">
+              Minimiza o erro quadrático com álgebra linear direta (Matemática para IA). Cada coeficiente (<code class="text-xs">modelo.coef_</code>) permite auditar exatamente quanto cada feature pesa na decisão.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+            <h3 class="text-sm font-bold text-indigo-500">3. Prova de Conceito (PoC) Eficiente</h3>
+            <p class="text-xs text-[var(--muted-foreground)] mt-1 leading-relaxed">
+              Simples, rápida e sem perigo de overfitting severo em amostras acadêmicas, perfeita para comprovar o fluxo ponta a ponta.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-4">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Formulação Matemática</h4>
+          <div class="bg-[var(--sidebar)] p-3.5 rounded-lg font-mono text-xs border border-[var(--border)] overflow-x-auto text-indigo-400">
+            ŷ = w₀ + w₁·estoque + w₂·saídas₇ + w₃·saídas₃₀ + w₄·preço + w₅·promo
+          </div>
+          <div class="space-y-2 text-xs text-[var(--muted-foreground)]">
+            <div class="flex items-center justify-between border-b border-[var(--border)] pb-1.5">
+              <span>Amostra Total:</span>
+              <strong class="text-[var(--foreground)]">120 registros sintéticos</strong>
+            </div>
+            <div class="flex items-center justify-between border-b border-[var(--border)] pb-1.5">
+              <span>Divisão Treino / Teste:</span>
+              <strong class="text-[var(--foreground)]">80% / 20% (96 treino / 24 teste)</strong>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>Semente Aleatória:</span>
+              <strong class="text-[var(--foreground)] font-mono">random_state=42 (100% reproduzível)</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Etapa 03 - Métricas e Análise de Risco -->
+    <section class="slide flex-col space-y-6" data-slide="4">
+      <div class="flex items-center justify-between">
+        <span class="badge bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">Machine Learning Clássico</span>
+        <span class="text-xs text-[var(--muted-foreground)] font-mono">Etapa 03 · Resultados</span>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">Avaliação (MAE) & Regras de Ação</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- KPI MAE -->
+        <div class="p-5 rounded-xl bg-[var(--card)] border border-indigo-500/30 flex flex-col justify-between">
+          <div>
+            <span class="text-xs text-[var(--muted-foreground)] font-semibold uppercase">Métrica Principal</span>
+            <div class="text-3xl font-black text-indigo-500 mt-2">MAE: 4,76</div>
+            <div class="text-xs text-[var(--muted-foreground)] font-medium mt-1">unidades de erro médio</div>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)] mt-4 pt-3 border-t border-[var(--border)]">
+            Diferente do MSE, o <strong>MAE</strong> não distorce os erros elevando ao quadrado e conversa na linguagem do lojista (erro médio de ~5 unidades).
+          </p>
+        </div>
+
+        <!-- Matriz de Regras Operacionais -->
+        <div class="md:col-span-2 p-5 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-4">
+          <h3 class="text-sm font-bold">Da Previsão Numérica ao Alerta de Estoque</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">O modelo fecha o ciclo convertendo a previsão em status acionável para o almoxarifado:</p>
+          
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs">
+              <span class="font-semibold text-red-500 flex items-center gap-2"><span>⚠️</span> Possível Falta</span>
+              <code class="font-mono text-red-400">estoque_atual &lt; demanda_prevista</code>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs">
+              <span class="font-semibold text-amber-500 flex items-center gap-2"><span>📦</span> Possível Excesso</span>
+              <code class="font-mono text-amber-400">estoque_atual &gt; 1.8 × demanda_prevista</code>
+            </div>
+            <div class="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs">
+              <span class="font-semibold text-emerald-500 flex items-center gap-2"><span>✅</span> Estoque Adequado</span>
+              <code class="font-mono text-emerald-400">Demais faixas equilibradas</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Gancho de Transição (Etapa 3 -> Etapa 4) -->
+    <section class="slide flex-col space-y-6" data-slide="5">
+      <div class="flex items-center justify-between">
+        <span class="badge bg-purple-500/10 text-purple-600 border border-purple-500/20">O Elo do Semestre</span>
+        <span class="text-xs text-[var(--muted-foreground)] font-mono">Transição 03 → 04</span>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">O Dilema da Restrição Financeira</h2>
+
+      <div class="p-5 rounded-xl bg-gradient-to-r from-indigo-900/30 via-[var(--card)] to-purple-900/30 border border-indigo-500/30">
+        <p class="text-base text-[var(--foreground)] font-medium leading-relaxed">
+          <em>"A regressão aponta que vai faltar Café e Leite nas próximas 4 semanas. Porém, no mundo corporativo, o orçamento de compras nunca é ilimitado. Como decidir o que comprar quando o dinheiro não dá para tudo?"</em>
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-3">
+          <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Necessidade do Ciclo (4 Semanas)</div>
+          <div class="text-2xl font-black text-red-400">R$ 1.475,72</div>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            Custo total para sanar 100% da necessidade de reposição estimada:<br>
+            • <strong>Café 500g:</strong> 48 unidades × R$ 18,78<br>
+            • <strong>Leite UHT 1L:</strong> 98 unidades × R$ 5,86
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-3">
+          <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Teto Orçamentário Definido</div>
+          <div class="text-2xl font-black text-emerald-400">R$ 1.000,00</div>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            Limite estrito de caixa (Déficit de R$ 475,72).<br>
+            <strong class="text-[var(--foreground)]">Objetivo da Etapa 04:</strong> Utilizar um Algoritmo Genético para encontrar a melhor combinação de compra dentro dos R$ 1.000,00.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: Etapa 04 - Algoritmo Genético -->
+    <section class="slide flex-col space-y-6" data-slide="6">
+      <div class="flex items-center justify-between">
+        <span class="badge bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Computação Evolutiva</span>
+        <span class="text-xs text-[var(--muted-foreground)] font-mono">Etapa 04 · Modelagem</span>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">O Algoritmo Genético na Tomada de Decisão</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+          <span class="text-xs font-bold text-emerald-500">1. Cromossomo (Indivíduo)</span>
+          <p class="text-xs text-[var(--muted-foreground)]">Vetor com 6 genes contendo as quantidades compradas de cada SKU:</p>
+          <div class="font-mono text-[11px] bg-[var(--sidebar)] p-2 rounded border border-[var(--border)] text-indigo-400">
+            [q_Arroz, q_Café, q_Det, q_Feij, q_Leite, q_Refri]
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+          <span class="text-xs font-bold text-emerald-500">2. Função de Viabilidade</span>
+          <p class="text-xs text-[var(--muted-foreground)]">A função <code>ajustar_ao_orcamento</code> força o indivíduo a ser viável: corta compras além da necessidade e remove itens caros se passar de R$ 1.000.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+          <span class="text-xs font-bold text-emerald-500">3. Função de Aptidão (Fitness)</span>
+          <p class="text-xs text-[var(--muted-foreground)]">Equilibra volume atendido e diversidade em gôndola:</p>
+          <div class="font-mono text-[10px] bg-[var(--sidebar)] p-2 rounded border border-[var(--border)] text-emerald-400">
+            fitness = (% atendido × 10) - (risco × 5)
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] flex flex-wrap items-center justify-between text-xs gap-4">
+        <div><strong class="text-[var(--foreground)]">População:</strong> 60 indivíduos</div>
+        <div><strong class="text-[var(--foreground)]">Gerações:</strong> 100 iterações</div>
+        <div><strong class="text-[var(--foreground)]">Seleção:</strong> Top 20 pais</div>
+        <div><strong class="text-[var(--foreground)]">Elitismo:</strong> 2 melhores protegidos</div>
+        <div><strong class="text-[var(--foreground)]">Mutação:</strong> Taxa de 20%</div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: Etapa 04 - O Confronto de Resultados -->
+    <section class="slide flex-col space-y-6" data-slide="7">
+      <div class="flex items-center justify-between">
+        <span class="badge bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Computação Evolutiva</span>
+        <span class="text-xs text-[var(--muted-foreground)] font-mono">Etapa 04 · Resultados</span>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">O Confronto: Regra Ingênua vs. Algoritmo Genético</h2>
+
+      <div class="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--card)]">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-[var(--sidebar)] text-[var(--muted-foreground)] font-bold border-b border-[var(--border)]">
+            <tr>
+              <th class="p-3.5">Indicador de Negócio</th>
+              <th class="p-3.5">Solução Ingênua (Divisão Igual)</th>
+              <th class="p-3.5 bg-emerald-500/10 text-emerald-500 font-extrabold">Solução Otimizada (AG)</th>
+              <th class="p-3.5">Ganho Real</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)]">
+            <tr>
+              <td class="p-3.5 font-medium">Orçamento Executado</td>
+              <td class="p-3.5 font-mono text-red-400">R$ 314,32 (31,4%)</td>
+              <td class="p-3.5 font-mono bg-emerald-500/5 text-emerald-400 font-bold">R$ 987,44 (98,7%)</td>
+              <td class="p-3.5 text-[var(--muted-foreground)]">+ R$ 673,12 investidos</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-medium">Demanda Atendida</td>
+              <td class="p-3.5 font-mono text-red-400">24,7% (36 unidades)</td>
+              <td class="p-3.5 font-mono bg-emerald-500/5 text-emerald-400 font-bold">82,2% (120 unidades)</td>
+              <td class="p-3.5 text-emerald-500 font-bold">+ 57,5% de cobertura</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-medium">Produtos em Risco Crítico</td>
+              <td class="p-3.5 text-red-400 font-semibold">2 produtos (Café e Leite)</td>
+              <td class="p-3.5 bg-emerald-500/5 text-emerald-400 font-semibold">Apenas 1 produto</td>
+              <td class="p-3.5 text-[var(--muted-foreground)]">Leite 100% atendido (98 un)</td>
+            </tr>
+            <tr>
+              <td class="p-3.5 font-medium">Pontuação de Fitness</td>
+              <td class="p-3.5 font-mono">236,58</td>
+              <td class="p-3.5 font-mono bg-emerald-500/5 text-emerald-400 font-bold">816,92</td>
+              <td class="p-3.5 text-emerald-500 font-bold">+ 245% de eficácia</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-[var(--muted-foreground)]">
+        <strong>Conclusão da Otimização:</strong> A regra ingênua reservou R$ 166 para produtos que já tinham estoque de sobra. O AG direcionou os recursos para onde a previsão da Etapa 03 apontou escassez iminente.
+      </p>
+    </section>
+
+    <!-- SLIDE 8: Conclusão & Preparação para a Banca -->
+    <section class="slide flex-col space-y-6" data-slide="8">
+      <div class="flex items-center justify-between">
+        <span class="badge bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">Fechamento</span>
+        <span class="text-xs text-[var(--muted-foreground)] font-mono">Conclusão & FAQ</span>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight">Conclusão do Ciclo & Perguntas da Banca</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+          <h3 class="text-xs font-bold text-indigo-400 uppercase">"Dataset Sintético?"</h3>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            Permitido nas Etapas 02 e 03. O pipeline de código está pronto: para rodar com dados de ERP real, basta alterar o carregamento inicial do CSV/banco.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+          <h3 class="text-xs font-bold text-indigo-400 uppercase">"Por que não Modelo Complexo?"</h3>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            A Regressão Linear garantiu interpretabilidade total com erro baixo (MAE 4,76 unids). Modelos mais densos demandariam mais volume histórico.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+          <h3 class="text-xs font-bold text-indigo-400 uppercase">"Por que Algoritmo Genético?"</h3>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+            Permite acoplar regras não-lineares de varejo (descontos por lote, limitação de caminhão, shelf-life) que a programação linear tradicional não suporta com agilidade.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2">
+        <div class="text-emerald-500 font-bold text-sm">Entrega do Semestre Concluída com Sucesso</div>
+        <p class="text-xs text-[var(--muted-foreground)] max-w-xl mx-auto">
+          Um fluxo contínuo e fundamentado: <strong>Dado Estruturado → Inteligência Preditiva (ML) → Inteligência Prescritiva (Computação Evolutiva)</strong>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Speaker Notes Overlay / Drawer -->
+    <div id="speakerNotesBox" class="mt-6 p-4 rounded-xl bg-[var(--sidebar)] border border-indigo-500/30 hidden">
+      <div class="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider mb-1">
+        <span>🎙️</span> Roteiro de Fala Recomendado para este Slide
+      </div>
+      <p id="speakerNotesText" class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+        Abertura: Cumprimente a banca, apresente a equipe e destaque a mudança de foco do PI IV para código e implementação de IA ponta a ponta.
+      </p>
+    </div>
+
+  </main>
+
+  <!-- Bottom Controls -->
+  <footer class="w-full border-t border-[var(--border)] bg-[var(--card)]/90 backdrop-blur-md px-6 py-4 sticky bottom-0 z-50">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="text-xs text-[var(--muted-foreground)] hidden sm:block">
+        Dica: Use as teclas <kbd class="px-1.5 py-0.5 bg-[var(--sidebar)] border border-[var(--border)] rounded text-[10px]">←</kbd> <kbd class="px-1.5 py-0.5 bg-[var(--sidebar)] border border-[var(--border)] rounded text-[10px]">→</kbd> ou <kbd class="px-1.5 py-0.5 bg-[var(--sidebar)] border border-[var(--border)] rounded text-[10px]">Espaço</kbd>
+      </div>
+
+      <div class="flex items-center space-x-3 mx-auto sm:mx-0">
+        <button id="prevBtn" onclick="prevSlide()" class="px-4 py-2 rounded-lg border border-[var(--border)] hover:bg-[var(--sidebar)] text-xs font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed">
+          ← Anterior
+        </button>
+        <button id="nextBtn" onclick="nextSlide()" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition disabled:opacity-30 disabled:cursor-not-allowed">
+          Próximo →
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 8;
+    let showNotes = false;
+
+    const notes = {
+      1: "Cumprimente os avaliadores. Enfatize que o PI IV tem como foco aplicar IA na prática. Diga claramente que o trabalho une duas metades: a Etapa 3 prevê o consumo e a Etapa 4 otimiza a decisão de compra.",
+      2: "Explique que as 5 features foram escolhidas pelo problema de varejo, e não por acaso. Estoque atual, saídas recentes e de 30 dias, preço e promoção cobrem o comportamento essencial de demanda.",
+      3: "Deixe claro por que é Regressão: a demanda futura é um número contínuo, não uma classe binária. A Regressão Linear aplica o método dos mínimos quadrados (visto em Matemática para IA) e permite inspecionar cada coeficiente com transparência total.",
+      4: "Destaque o MAE de 4,76: explique que o erro médio é de apenas ~5 unidades. Mostre a regra prática de risco (estoque menor que a previsão = risco de falta; acima de 1.8x = risco de excesso) que qualquer gestor entende.",
+      5: "Este é o gancho mais importante da apresentação: ter a previsão não resolve tudo se o dinheiro for finito. Precisamos de R$ 1.475, mas o caixa só tem R$ 1.000. É aqui que entra a Computação Evolutiva.",
+      6: "Explique o Algoritmo Genético: cada indivíduo é um carrinho de compras com as quantidades dos 6 produtos. A função de ajuste corta o excesso para caber em R$ 1.000. O fitness premia quem atende mais demanda e penaliza prateleira vazia.",
+      7: "Apresente a tabela com convicção: a solução ingênua gastou apenas R$ 314 e atendeu só 24% da demanda. O Algoritmo Genético usou 98,7% do orçamento e atendeu 82,2% da demanda, cobrindo 100% do Leite e parte do Café!",
+      8: "Conclua mostrando que o pipeline funciona de ponta a ponta. Se a banca perguntar sobre dados simulados ou por que não usaram redes neurais, use as respostas preparadas nos cards."
+    };
+
+    function updateSlide() {
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      const activeEl = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+      if (activeEl) activeEl.classList.add('active');
+
+      document.getElementById('slideCounter').innerText = `${currentSlide} / ${totalSlides}`;
+      document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+      document.getElementById('prevBtn').disabled = currentSlide === 1;
+      document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+
+      document.getElementById('speakerNotesText').innerText = notes[currentSlide] || "";
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleNotes() {
+      showNotes = !showNotes;
+      const box = document.getElementById('speakerNotesBox');
+      const btnText = document.getElementById('notesBtnText');
+      if (showNotes) {
+        box.classList.remove('hidden');
+        btnText.innerText = "Ocultar Notas";
+      } else {
+        box.classList.add('hidden');
+        btnText.innerText = "Mostrar Notas";
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'n' || e.key === 'N') {
+        toggleNotes();
+      }
+    });
+
+    updateSlide();
+  </script>
+</body>
+</html>

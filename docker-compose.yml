@@ -1,0 +1,79 @@
+name: gestao-preditiva-estoque
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      target: runtime
+    ports: ["3000:80"]
+    depends_on:
+      api_backend: { condition: service_healthy }
+    networks: [ai_inventory_network]
+
+  api_backend:
+    build: &backend_build
+      context: ./backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    environment: &backend_env
+      REDIS_URL: redis://redis_broker:6379/0
+      REDIS_RESULT_URL: redis://redis_broker:6379/1
+      MODEL_STORE_PATH: /app/models/demand_forecaster.joblib
+      DEFAULT_BUDGET_LIMIT: "1000.00"
+      DEFAULT_CYCLE_WEEKS: "4"
+      DEFAULT_RANDOM_SEED: "42"
+      PROGRESS_EVERY_GENERATIONS: "10"
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      LOG_LEVEL: INFO
+      PYTHONPATH: /app/src
+    volumes: [model_store:/app/models]
+    ports: ["8000:8000"]
+    depends_on:
+      redis_broker: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request;urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks: [ai_inventory_network]
+
+  celery_worker:
+    build: *backend_build
+    command: celery -A core.celery_app worker --loglevel=info -Q optimization_queue --concurrency=2
+    environment: *backend_env
+    volumes: [model_store:/app/models]
+    depends_on:
+      redis_broker: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A core.celery_app inspect ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks: [ai_inventory_network]
+
+  redis_broker:
+    image: redis:7-alpine
+    command: redis-server --appendonly no --save ""
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [ai_inventory_network]
+
+  model_trainer:
+    build: *backend_build
+    command: python -m infrastructure.forecasting.model_store --train
+    environment: *backend_env
+    volumes: [model_store:/app/models]
+    profiles: ["tools"]
+    networks: [ai_inventory_network]
+
+volumes:
+  model_store:
+
+networks:
+  ai_inventory_network:
+    driver: bridge

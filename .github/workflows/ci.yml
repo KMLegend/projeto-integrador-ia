@@ -1,0 +1,138 @@
+name: CI - Integracao Continua e Portoes de Qualidade
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend-lint-and-calisthenics:
+    name: Backend Linters & Calisthenics
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+
+      - name: Portao 1 - Formatacao com Ruff
+        run: ruff format --check backend/src
+
+      - name: Portao 2 - Lint com Ruff (C901, PLR0912, PLR0913)
+        run: ruff check backend/src
+
+      - name: Portao 3 - Tipagem estrita com Mypy
+        run: mypy --strict backend/src
+
+      - name: Portao 4 - Contratos de fronteira com Import-Linter
+        run: |
+          cd backend
+          PYTHONPATH=src lint-imports
+
+      - name: Portao 5 - Object Calisthenics
+        run: bash backend/scripts/check_calisthenics.sh
+
+  backend-tests:
+    name: Backend Unit & Integration Tests (Cobertura >= 95% Dominio)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+
+      - name: Portao 6 - Cobertura de Dominio (>= 95%)
+        run: |
+          cd backend
+          PYTHONPATH=src pytest tests/unit tests/integration -o addopts="" --cov=domain --cov-fail-under=95
+
+      - name: Portao 7 - Cobertura Global (>= 80%)
+        run: |
+          cd backend
+          PYTHONPATH=src pytest tests/unit tests/integration --cov=src --cov-fail-under=80
+
+  frontend-quality:
+    name: Frontend Lint, Typecheck & Vitest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Portao 8 - Verificacao de Tipos TypeScript (zero any)
+        run: |
+          cd frontend
+          npx tsc --noEmit
+
+      - name: Portao 9 - ESLint (fronteiras de modulos e regras de UI)
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Portao 10 - Testes Vitest (estados de UI e formatadores)
+        run: |
+          cd frontend
+          npm test -- --run
+
+      - name: Portao 11 - Build de Producao Vite
+        run: |
+          cd frontend
+          npm run build
+
+  compose-e2e:
+    name: Docker Compose Ponta a Ponta (10 Criterios)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: Criar arquivo .env
+        run: cp .env.example .env
+
+      - name: Build dos containers Docker Compose
+        run: docker compose build
+
+      - name: Subir servicos em background
+        run: docker compose up -d
+
+      - name: Aguardar servicos ficarem healthy
+        run: |
+          echo "Aguardando api_backend e celery_worker..."
+          timeout 60 bash -c 'until docker compose ps | grep -q "(healthy)"; do sleep 2; done'
+
+      - name: Executar testes ponta a ponta
+        run: docker compose run --rm api_backend pytest tests/e2e
+
+      - name: Encerrar containers e limpar volumes
+        if: always()
+        run: docker compose down -v

@@ -1,0 +1,44 @@
+[importlinter]
+root_packages =
+    domain
+    application
+    infrastructure
+    api
+    core
+include_external_packages = True
+
+[importlinter:contract:camadas]
+name = Regra de dependencia das camadas
+type = layers
+layers =
+    api
+    infrastructure
+    application
+    domain
+
+[importlinter:contract:dominio-puro]
+name = Dominio nao depende de bibliotecas externas
+type = forbidden
+source_modules =
+    domain
+    application
+forbidden_modules =
+    numpy
+    pandas
+    sklearn
+    joblib
+    redis
+    celery
+    fastapi
+    pydantic
+    starlette
+
+[importlinter:contract:api-nao-toca-infra]
+name = API acessa infraestrutura somente pelo container
+type = forbidden
+source_modules = api
+forbidden_modules = infrastructure
+allow_indirect_imports = True
+ignore_imports =
+    core.container -> infrastructure.*
+unmatched_ignore_imports_alerting = none

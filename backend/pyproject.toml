@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inventory-optimization-backend"
+version = "0.1.0"
+description = "Gestao Preditiva de Estoque com IA - Backend"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+    "celery",
+    "redis",
+    "websockets",
+    "scikit-learn",
+    "pandas",
+    "numpy",
+    "joblib",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "B",
+    "UP",
+    "SIM",
+    "C901",
+    "PLR0912",
+    "PLR0913",
+]
+ignore = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 5
+
+[tool.ruff.lint.pylint]
+max-branches = 4
+max-args = 5
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "src"
+explicit_package_bases = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+
+[[tool.mypy.overrides]]
+module = [
+    "celery.*",
+    "sklearn.*",
+    "joblib.*",
+    "numpy.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra -q --cov=src --cov-report=term-missing"
