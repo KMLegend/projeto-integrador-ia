@@ -84,8 +84,9 @@ Arredondado para exibição: custo R$ 314,32 · cobertura 24,7% · risco 2 · fi
 | `items_at_risk` | **1** | só Café (22 < 48) |
 | `fitness` | **816,9178…** | 82,1917 × 10 − 1 × 5 |
 | `budget_usage_ratio` | **98,7%** | 987,44 / 1000 |
-| `history[0]` | **777,67** | melhor da população inicial aleatória |
+| `history[0]` | **803,22** | melhor da população inicial aleatória — **depende do `RandomSource`**; não é valor-ouro. Com `random.Random(42)` da stdlib: 803,22. Com o stream do NumPy (notebook): 777,67. |
 | `history[-1]` | **816,92** | melhor da última geração |
+
 
 Detalhamento por item do plano ótimo:
 

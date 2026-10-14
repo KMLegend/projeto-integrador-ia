@@ -14,12 +14,8 @@ class StockRiskClassifier:
 
     @staticmethod
     def with_thresholds(thresholds: StockRiskThresholds) -> "StockRiskClassifier":
-        return StockRiskClassifier(
-            (
-                ShortageRule(),
-                ExcessRule(thresholds),
-            )
-        )
+        rules = (ShortageRule(), ExcessRule(thresholds))
+        return StockRiskClassifier(rules)
 
     @staticmethod
     def standard() -> "StockRiskClassifier":

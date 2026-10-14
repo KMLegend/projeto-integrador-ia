@@ -29,7 +29,7 @@ class OptimizationOutcome:  # OC-8: DTO de saida com payload completo da otimiza
         )
 
     @staticmethod
-    def completed(  # noqa: PLR0913
+    def completed(  # noqa: PLR0913  # OC-8: Factory instanciando DTO imutavel com multiplos atributos
         task_id: str,
         best_scenario_summary: Mapping[str, Any],
         items_to_buy: Sequence[Mapping[str, Any]],
@@ -46,6 +46,21 @@ class OptimizationOutcome:  # OC-8: DTO de saida com payload completo da otimiza
             convergence_curve=convergence_curve,
             model_metrics=model_metrics,
         )
+
+    def to_status_view(self) -> "OptimizationStatusView":
+        res = self._build_result_dict() if self.status == "COMPLETED" else None
+        return OptimizationStatusView(
+            task_id=self.task_id, status=self.status, result=res, error=self.error
+        )
+
+    def _build_result_dict(self) -> Mapping[str, Any]:  # OC-8: Montagem de dicionario de resultado
+        return {
+            "best_scenario_summary": self.best_scenario_summary,
+            "items_to_buy": self.items_to_buy,
+            "baseline_comparison": self.baseline_comparison,
+            "convergence_curve": self.convergence_curve,
+            "model_metrics": self.model_metrics,
+        }
 
 
 @dataclass(frozen=True, slots=True)

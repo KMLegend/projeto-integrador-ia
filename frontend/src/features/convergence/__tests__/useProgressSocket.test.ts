@@ -49,6 +49,32 @@ describe('useProgressSocket', () => {
     expect(result.current.status).toBe('completed');
   });
 
+  it('ignora frames sentinela com geracao negativa ou fitness zero (D-09 / FIX 3)', () => {
+    const fakeChannel = new FakeProgressChannel();
+    const taskId = 'task-sentinel-123';
+
+    const { result } = renderHook(() => useProgressSocket(taskId, fakeChannel));
+
+    act(() => {
+      fakeChannel.emitProgress(taskId, {
+        generation: 0,
+        max_fitness: 803.22,
+        status: 'evolving',
+      });
+      // Sentinel frame: generation -1 and max_fitness 0.0
+      fakeChannel.emitProgress(taskId, {
+        generation: -1,
+        max_fitness: 0.0,
+        status: 'completed',
+      });
+    });
+
+    expect(result.current.status).toBe('completed');
+    expect(result.current.points).toHaveLength(1);
+    expect(result.current.points[0]).toEqual({ generation: 0, max_fitness: 803.22 });
+    expect(result.current.currentGeneration).toBe(0);
+  });
+
   it('sinaliza falha sem quebrar quando socket dispara erro', () => {
     const fakeChannel = new FakeProgressChannel();
     const taskId = 'task-err-123';

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from domain.model.budget_constraint import BudgetConstraint
+from domain.model.coverage_report import CoverageReport
 from domain.model.position import Position
 from domain.model.purchase_plan import PurchasePlan
 from domain.model.replenishment_scenario import ReplenishmentScenario
@@ -20,7 +21,7 @@ class StrategyAssessment:  # OC-8: DTO de avaliacao de estrategia
     items_at_risk: int
     fitness: float
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:  # OC-8: DTO serializer para dicionario
         return {
             "total_cost": self.total_cost,
             "served_quantity": self.served_quantity,
@@ -79,25 +80,34 @@ class CompareReplenishmentStrategies:
         plan: PurchasePlan,
         scenario: ReplenishmentScenario,
     ) -> StrategyAssessment:
-        cost = float(scenario.total_cost_of(plan).value_for_serialization())
         report = self._policies.coverage_calculator.report_for(plan, scenario)
-
-        served_units = sum(
-            min(
-                plan.quantity_at(Position(idx)).units_value(),
-                scenario.item_at(Position(idx)).required_quantity().units_value(),
-            )
-            for idx in range(scenario.size())
+        cost = float(scenario.total_cost_of(plan).value_for_serialization())
+        fit = round(self._policies.fitness_policy.evaluate(plan, scenario).fitness_value(), 2)
+        return self._build_assessment(
+            cost, self._calculate_served_units(plan, scenario), report, fit
         )
 
-        served_ratio = round(report.served_ratio().points(), 1)
-        items_at_risk = report.items_at_risk_count()
-        fitness = round(self._policies.fitness_policy.evaluate(plan, scenario).fitness_value(), 2)
-
+    @staticmethod
+    def _build_assessment(  # OC-8: Instanciacao de StrategyAssessment
+        cost: float, served: int, report: CoverageReport, fitness: float
+    ) -> StrategyAssessment:
         return StrategyAssessment(
             total_cost=cost,
-            served_quantity=served_units,
-            served_ratio=served_ratio,
-            items_at_risk=items_at_risk,
+            served_quantity=served,
+            served_ratio=round(report.served_ratio().points(), 1),
+            items_at_risk=report.items_at_risk_count(),
             fitness=fitness,
+        )
+
+    @staticmethod
+    def _calculate_served_units(  # OC-8: Calculo de somatorio de unidades atendidas por posicao
+        plan: PurchasePlan, scenario: ReplenishmentScenario
+    ) -> int:
+
+        return sum(
+            min(
+                plan.quantity_at(Position(i)).units_value(),
+                scenario.item_at(Position(i)).required_quantity().units_value(),
+            )
+            for i in range(scenario.size())
         )

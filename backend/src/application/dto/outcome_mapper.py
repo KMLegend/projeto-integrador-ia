@@ -7,7 +7,9 @@ class OutcomeMapper:
     """Mapeador entre OptimizationOutcome e dicionarios serializaveis."""
 
     @staticmethod
-    def to_payload(outcome: OptimizationOutcome) -> dict[str, Any]:
+    def to_payload(
+        outcome: OptimizationOutcome,
+    ) -> dict[str, Any]:  # OC-8: Serializador de DTO para dicionario
         return {
             "task_id": outcome.task_id,
             "status": outcome.status,
@@ -16,7 +18,9 @@ class OutcomeMapper:
         }
 
     @staticmethod
-    def _build_result_field(outcome: OptimizationOutcome) -> dict[str, Any] | None:
+    def _build_result_field(
+        outcome: OptimizationOutcome,
+    ) -> dict[str, Any] | None:  # OC-8: Montador de secoes
         if outcome.status != "COMPLETED":
             return None
         return {

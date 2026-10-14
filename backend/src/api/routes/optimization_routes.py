@@ -4,9 +4,16 @@ from fastapi import APIRouter, status
 
 from api.schemas.requests import OptimizeRequestSchema
 from api.schemas.responses import OptimizeAcceptedResponse
+from application.dto.optimization_outcome import OptimizationOutcome
 from core.celery_app import celery_app
+from core.config import get_settings
+from core.container import build_task_result_store
+from domain.errors.domain_errors import UnknownDatasetError
+from domain.model.task_id import TaskId
 
 router = APIRouter(prefix="/api/v1", tags=["optimization"])
+
+KNOWN_DATASETS: tuple[str, ...] = ("historico_mensal_v1", "default")
 
 
 @router.post(
@@ -16,9 +23,16 @@ router = APIRouter(prefix="/api/v1", tags=["optimization"])
 )
 def trigger_optimization(payload: OptimizeRequestSchema) -> OptimizeAcceptedResponse:
     """Dispara o processo assincrono de otimizacao genetica."""
+    if payload.dataset_reference not in KNOWN_DATASETS:
+        raise UnknownDatasetError(f"Dataset desconhecido: '{payload.dataset_reference}'")
+
     task_id = str(uuid4())
     dict_payload = payload.model_dump()
     dict_payload["task_id"] = task_id
+
+    settings = get_settings()
+    store = build_task_result_store(settings)
+    store.save(TaskId.of(task_id), OptimizationOutcome.processing(task_id))
 
     celery_app.send_task(
         "optimization.run",

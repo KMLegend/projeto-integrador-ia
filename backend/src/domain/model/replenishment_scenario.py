@@ -44,13 +44,11 @@ class ReplenishmentScenario:
     def most_expensive_position_among(self, positions: tuple[Position, ...]) -> MaybePosition:
         if not positions:
             return MaybePosition.absent()
+        return max(positions, key=self._position_sort_key).as_maybe()
 
-        def key_func(p: Position) -> tuple[int, int]:
-            price_cents = self._items[p.index_value()].unit_price().cents_for_computation()
-            return (price_cents, -p.index_value())
-
-        best = max(positions, key=key_func)
-        return best.as_maybe()
+    def _position_sort_key(self, p: Position) -> tuple[int, int]:
+        price_cents = self._items[p.index_value()].unit_price().cents_for_computation()
+        return (price_cents, -p.index_value())
 
     def positions_with_demand(self) -> tuple[Position, ...]:
         return tuple(Position(idx) for idx, item in enumerate(self._items) if item.has_demand())

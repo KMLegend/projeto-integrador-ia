@@ -9,9 +9,11 @@ class StockRiskLevel(StrEnum):
     EXCESS = "EXCESS"
 
     def label_pt_br(self) -> str:
-        labels = {
-            StockRiskLevel.SHORTAGE: "Possível falta",
-            StockRiskLevel.ADEQUATE: "Adequado",
-            StockRiskLevel.EXCESS: "Possível excesso",
-        }
-        return labels[self]
+        return _LABELS_PT_BR[self]
+
+
+_LABELS_PT_BR: dict[StockRiskLevel, str] = {
+    StockRiskLevel.SHORTAGE: "Possível falta",
+    StockRiskLevel.ADEQUATE: "Adequado",
+    StockRiskLevel.EXCESS: "Possível excesso",
+}

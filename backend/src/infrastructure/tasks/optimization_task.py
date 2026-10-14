@@ -48,7 +48,13 @@ def run_optimization(self: Any, payload: dict[str, Any]) -> dict[str, Any]:
         observer = build_evolution_observer(settings, task_id, request.generations)
         use_case = build_optimization_use_case(settings, request.dataset_reference)
         outcome = use_case.execute(request, observer)
-        publisher.publish_terminal_state("completed", generation=request.generations)
+        final_fitness = 0.0
+        if outcome.best_scenario_summary is not None:
+            final_fitness = float(outcome.best_scenario_summary.get("fitness", 0.0))
+        last_gen = max(0, request.generations - 1)
+        publisher.publish_terminal_state(
+            "completed", generation=last_gen, max_fitness=final_fitness
+        )
         return OutcomeMapper.to_payload(outcome)
     except DomainError as err:
         err_type = type(err).__name__

@@ -28,7 +28,7 @@ class OptimizationRequest:  # OC-8: DTO de entrada para caso de uso de otimizaca
     def to_replenishment_cycle(self) -> ReplenishmentCycle:
         return ReplenishmentCycle.of_weeks(self.cycle_weeks)
 
-    def to_evolution_settings(self) -> EvolutionSettings:
+    def to_evolution_settings(self) -> EvolutionSettings:  # OC-8: Instanciacao de EvolutionSettings
         return EvolutionSettings(
             population_size=self.population_size,
             generations=self.generations,
@@ -40,8 +40,11 @@ class OptimizationRequest:  # OC-8: DTO de entrada para caso de uso de otimizaca
         )
 
     @staticmethod
-    def from_payload(payload: dict[str, Any]) -> "OptimizationRequest":
+    def from_payload(
+        payload: dict[str, Any],
+    ) -> "OptimizationRequest":  # OC-8: Desserializacao de payload da API
         ga_params = payload.get("ga_parameters") or {}
+
         return OptimizationRequest(
             task_id=str(payload.get("task_id", "default-task")),
             budget_limit=float(payload.get("budget_limit", 1000.00)),

@@ -10,7 +10,7 @@ from domain.model.sku import Sku
 from domain.model.unit_price import UnitPrice
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def reference_scenario() -> ReplenishmentScenario:
     fixture_path = Path(__file__).parent / "fixtures" / "reference_scenario.json"
     with open(fixture_path, encoding="utf-8") as f:

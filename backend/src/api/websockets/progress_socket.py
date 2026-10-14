@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import logging
 
@@ -17,9 +18,12 @@ async def _stream_events(
     websocket: WebSocket, subscriber: ProgressSubscriber, task_id: str
 ) -> None:
     async for message in subscriber.stream_progress(task_id):
+        if websocket.client_state.name != "CONNECTED":
+            break
         await websocket.send_json(message)
         if message.get("status") in ("completed", "failed"):
-            await websocket.close(code=1000)
+            with contextlib.suppress(Exception):
+                await websocket.close(code=1000)
             break
 
 
@@ -41,7 +45,7 @@ async def websocket_progress_endpoint(websocket: WebSocket, task_id: str) -> Non
 
     try:
         await _stream_events(websocket, subscriber, task_id)
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect, asyncio.CancelledError):
         logger.info("Cliente desconectou do WebSocket da tarefa %s", task_id)
     except Exception as err:
         logger.error("Erro inesperado no WebSocket da tarefa %s: %s", task_id, err)

@@ -22,6 +22,14 @@ class StockRiskAssessmentIdentity:
     def stock_on_hand(self) -> Quantity:
         return self._stock_on_hand
 
+    def to_dict_for_serialization(self, risk_level: str) -> dict[str, str | int]:
+        return self._dict_for_serialization(self._sku.value_for_serialization(), risk_level)
+
+    def _dict_for_serialization(self, sku: str, risk: str) -> dict[str, str | int]:
+        d: dict[str, str | int] = {"sku": sku, "product": self._product_name}
+        d.update({"stock_on_hand": self._stock_on_hand.units_value(), "risk_level": risk})
+        return d
+
 
 @dataclass(frozen=True, slots=True)
 class StockRiskAssessment:
@@ -55,9 +63,4 @@ class StockRiskAssessment:
         return self._risk_level
 
     def value_for_serialization(self) -> dict[str, str | int]:
-        return {
-            "sku": self._identity.sku().value_for_serialization(),
-            "product": self._identity.product_name(),
-            "stock_on_hand": self._identity.stock_on_hand().units_value(),
-            "risk_level": self._risk_level.name,
-        }
+        return self._identity.to_dict_for_serialization(self._risk_level.name)

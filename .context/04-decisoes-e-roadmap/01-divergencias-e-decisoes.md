@@ -129,6 +129,38 @@ Motivos: (a) fidelidade exata aos valores apresentados à banca, incluindo o rep
 
 **Consequência.** Em produção, Nginx faz proxy de `/api/` e `/ws/`, então o frontend chama caminhos relativos e CORS deixa de ser necessário.
 
+## D-14 — Localização das portas de persistência e mensageria em application/ports/
+
+**Contexto.** A especificação preliminar sugeria `domain/ports/task_result_store.py`. Contudo, o armazenamento de resultados assíncronos (`TaskResultStore`) e a subscrição/notificação de progresso (`ProgressSubscriber`, `TerminalStateNotifier`) são detalhes operacionais de orquestração de casos de uso e tarefas assíncronas, não regras de negócio do domínio puro (ISP/DIP).
+
+**Decisão.** Manter `TaskResultStore`, `ProgressSubscriber` e interfaces afins em `application/ports/`. O domínio permanece estritamente puro e focado em entidades, VOs e regras de reposição e evolução.
+
+**Consequência.** A arquitetura hexagonal fica rigorosa: a aplicação define suas próprias portas dirigidas sem poluir o núcleo de domínio com preocupações de infraestrutura e orquestração assíncrona.
+
+## D-15 — Alias dataset_reference: "default" para historico_mensal_v1
+
+**Contexto.** Chamadas de teste rápido ou integrações locais frequentemente utilizam `"default"` para referenciar o conjunto canônico de dados de varejo simulados.
+
+**Decisão.** Aceitar `"default"` no container de injeção de dependências como um alias transparente para `"historico_mensal_v1"`.
+
+**Consequência.** Chamadas que utilizam `"default"` ou `"historico_mensal_v1"` são ambas válidas e mapeadas para o mesmo repositório de histórico.
+
+## D-16 — Validação síncrona com HTTP 422 UNKNOWN_DATASET na borda
+
+**Contexto.** A decisão D-07 exige rejeição com código `UNKNOWN_DATASET` para referências inválidas de dataset. Processar assincronamente aceitando com `202` contraria o princípio de fail-fast na API.
+
+**Decisão.** Validar o `dataset_reference` na borda HTTP (rota de otimização) retornando `422 Unprocessable Entity` síncrono com payload padronizado de erro (`code: UNKNOWN_DATASET`), mantendo a verificação no worker como defesa em profundidade.
+
+**Consequência.** Erros de cliente recebem feedback síncrono imediato, economizando recursos de fila do Celery e garantindo consistência com D-07.
+
+## D-17 — Estrutura plana de diretórios nas features do frontend
+
+**Contexto.** A criação preliminar de subpastas `features/<feature>/components` e `features/<feature>/hooks` gerou aninhamentos desnecessários e diretórios vazios quando os arquivos foram mantidos na raiz de cada feature.
+
+**Decisão.** Adotar layout plano por feature (`features/<feature>/Component.tsx`, `useHook.ts`, `__tests__/`), removendo subdiretórios redundantes e vazios.
+
+**Consequência.** Organização mais simples e legível, imports diretos e conformidade com o princípio de simplicidade.
+
 ---
 
 ## Como registrar uma divergência nova
@@ -137,3 +169,4 @@ Motivos: (a) fidelidade exata aos valores apresentados à banca, incluindo o rep
 2. Atualize o documento afetado para apontar para a decisão.
 3. Se a decisão alterar número apresentado à banca (fitness, custo, MAE, cobertura), **pare e consulte o time** — esses valores estão nos slides e no notebook.
 4. Nunca resolva divergência silenciosamente no código: sem registro, o próximo agente vai "consertar" de volta.
+

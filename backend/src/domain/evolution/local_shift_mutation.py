@@ -24,13 +24,12 @@ class LocalShiftMutation:
     ) -> PurchasePlan:
         if self._random_source.ratio() >= rate:
             return plan
+        return self._apply_shift(plan, scenario, mutation_range)
 
-        pos_index = self._random_source.integer_below(scenario.size())
-        target_pos = Position(pos_index)
-        variation = self._random_source.integer_inclusive(-mutation_range, mutation_range)
-
-        current_units = plan.quantity_at(target_pos).units_value()
-        new_units = max(0, current_units + variation)
-
-        mutated = plan.with_quantity_at(target_pos, Quantity.of(new_units))
-        return self._repair.repair(mutated, scenario)
+    def _apply_shift(
+        self, plan: PurchasePlan, scenario: ReplenishmentScenario, m_range: int
+    ) -> PurchasePlan:
+        pos = Position(self._random_source.integer_below(scenario.size()))
+        delta = self._random_source.integer_inclusive(-m_range, m_range)
+        new_q = Quantity.of(max(0, plan.quantity_at(pos).units_value() + delta))
+        return self._repair.repair(plan.with_quantity_at(pos, new_q), scenario)

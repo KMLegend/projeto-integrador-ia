@@ -17,33 +17,24 @@ class CoverageCalculator:
         plan: PurchasePlan,
         scenario: ReplenishmentScenario,
     ) -> CoverageReport:
-        required_total = scenario.required_total()
-        if required_total.is_zero() or scenario.size() == 0:
+        if scenario.required_total().is_zero() or scenario.size() == 0:
             return CoverageReport(Percentage.hundred(), 0)
+        return self._build_report(plan, scenario)
 
-        served_units = self._compute_served_units(plan, scenario)
-        items_at_risk = self._count_items_at_risk(plan, scenario)
-        served_ratio = Percentage.of(Quantity.of(served_units), required_total)
-        return CoverageReport(served_ratio, items_at_risk)
+    def _build_report(self, plan: PurchasePlan, scenario: ReplenishmentScenario) -> CoverageReport:
+        served = self._compute_served_units(plan, scenario)
+        ratio = Percentage.of(Quantity.of(served), scenario.required_total())
+        return CoverageReport(ratio, self._count_items_at_risk(plan, scenario))
 
-    def _compute_served_units(
-        self,
-        plan: PurchasePlan,
-        scenario: ReplenishmentScenario,
-    ) -> int:
-        return sum(
-            min(
-                plan.quantity_at(Position(idx)).units_value(),
-                scenario.item_at(Position(idx)).required_quantity().units_value(),
-            )
-            for idx in range(scenario.size())
-        )
+    def _compute_served_units(self, plan: PurchasePlan, scenario: ReplenishmentScenario) -> int:
+        return sum(self._served_at(plan, scenario, Position(i)) for i in range(scenario.size()))
 
-    def _count_items_at_risk(
-        self,
-        plan: PurchasePlan,
-        scenario: ReplenishmentScenario,
-    ) -> int:
+    def _served_at(self, plan: PurchasePlan, scenario: ReplenishmentScenario, pos: Position) -> int:
+        p_val = plan.quantity_at(pos).units_value()
+        r_val = scenario.item_at(pos).required_quantity().units_value()
+        return min(p_val, r_val)
+
+    def _count_items_at_risk(self, plan: PurchasePlan, scenario: ReplenishmentScenario) -> int:
         return sum(
             1 for idx in range(scenario.size()) if self._is_at_risk(plan, scenario, Position(idx))
         )

@@ -1,27 +1,42 @@
+import json
 import os
 import time
+
 import httpx
 import pytest
+import websockets.exceptions
+import websockets.sync.client
+
+pytestmark = pytest.mark.e2e
+
+
+def _probe_candidate() -> str | None:
+    for candidate in ["http://localhost:8000", "http://api_backend:8000"]:
+        try:
+            if httpx.get(f"{candidate}/health", timeout=2.0).status_code == 200:
+                return candidate
+        except Exception:
+            continue
+    return None
+
 
 def get_base_urls() -> tuple[str, str]:
-    api_url = os.getenv("API_BASE_URL")
-    if not api_url:
-        for candidate in ["http://localhost:8000", "http://api_backend:8000"]:
-            try:
-                res = httpx.get(f"{candidate}/health", timeout=2.0)
-                if res.status_code == 200:
-                    api_url = candidate
-                    break
-            except Exception:
-                continue
-    if not api_url:
-        api_url = "http://localhost:8000"
-
-    ws_url = os.getenv("WS_BASE_URL")
-    if not ws_url:
-        ws_url = api_url.replace("http://", "ws://").replace("https://", "wss://")
-
+    api_url = os.getenv("API_BASE_URL") or _probe_candidate() or "http://localhost:8000"
+    ws_default = api_url.replace("http://", "ws://").replace("https://", "wss://")
+    ws_url = os.getenv("WS_BASE_URL") or ws_default
     return api_url.rstrip("/"), ws_url.rstrip("/")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_stack_available() -> None:
+    """FIX 7: Pula a execucao caso o ambiente Docker Compose nao esteja acessivel."""
+    api_url, _ = get_base_urls()
+    try:
+        res = httpx.get(f"{api_url}/health", timeout=2.0)
+        if res.status_code != 200:
+            pytest.skip(f"Stack Docker nao disponivel em {api_url} (HTTP {res.status_code})")
+    except Exception as exc:
+        pytest.skip(f"Stack Docker nao disponivel em {api_url}: {exc}")
 
 
 def test_api_health_check_responds_healthy() -> None:
@@ -31,6 +46,59 @@ def test_api_health_check_responds_healthy() -> None:
     assert response.status_code == 200
     data = response.json()
     assert data.get("status") == "healthy"
+
+
+def test_immediate_status_and_websocket_after_accepted() -> None:
+    """FIX 1 & FIX 17: Tarefa imediatamente consultavel apos 202 com status PROCESSING."""
+    api_url, base_ws = get_base_urls()
+    start_resp = httpx.post(
+        f"{api_url}/api/v1/optimize",
+        json={"budget_limit": 1000.0, "dataset_reference": "default"},
+        timeout=10.0,
+    )
+    assert start_resp.status_code == 202
+    task_id = start_resp.json()["task_id"]
+    assert task_id
+
+    # Imediatamente consulta status sem sleep ou lacos
+    status_resp = httpx.get(f"{api_url}/api/v1/status/{task_id}", timeout=2.0)
+    assert status_resp.status_code == 200
+    current_status = status_resp.json()
+    assert current_status["status"] in ("PROCESSING", "COMPLETED")
+
+    # Imediatamente conecta ao WebSocket sem fechar com 4404
+    ws_url = f"{base_ws}/ws/v1/progress/{task_id}"
+    with websockets.sync.client.connect(ws_url, close_timeout=5) as ws:
+        msg = ws.recv(timeout=10.0)
+        data = json.loads(msg)
+        assert data.get("status") in ("evolving", "completed")
+
+
+def test_unknown_dataset_returns_422_synchronously() -> None:
+    """FIX 15(c): dataset_reference desconhecido rejeitado na borda com HTTP 422."""
+    api_url, _ = get_base_urls()
+    resp = httpx.post(
+        f"{api_url}/api/v1/optimize",
+        json={"budget_limit": 1000.0, "dataset_reference": "dataset_inexistente_xyz"},
+        timeout=5.0,
+    )
+    assert resp.status_code == 422
+    data = resp.json()
+    assert data.get("error", {}).get("code") == "UNKNOWN_DATASET"
+
+
+def test_nonexistent_task_returns_404_and_websocket_4404() -> None:
+    """FIX 1: Tarefa inexistente devolve 404 no status e fecha WebSocket com 4404."""
+    api_url, base_ws = get_base_urls()
+    fake_id = "00000000-0000-0000-0000-000000000000"
+    status_resp = httpx.get(f"{api_url}/api/v1/status/{fake_id}", timeout=2.0)
+    assert status_resp.status_code == 404
+
+    ws_url = f"{base_ws}/ws/v1/progress/{fake_id}"
+    with websockets.sync.client.connect(ws_url, close_timeout=5) as ws:
+        with pytest.raises(websockets.exceptions.ConnectionClosed) as exc_info:
+            ws.recv(timeout=5.0)
+        assert exc_info.value.rcvd.code == 4404
 
 
 def test_end_to_end_optimization_pipeline_with_reference_scenario() -> None:
@@ -76,7 +144,7 @@ def test_end_to_end_optimization_pipeline_with_reference_scenario() -> None:
         if current_status["status"] == "COMPLETED":
             completed_data = current_status
             break
-        elif current_status["status"] == "FAILED":
+        if current_status["status"] == "FAILED":
             pytest.fail(f"Tarefa de otimizacao falhou: {current_status}")
 
         time.sleep(1.0)
@@ -110,9 +178,8 @@ def test_end_to_end_optimization_pipeline_with_reference_scenario() -> None:
 
     # Validacao da lista de itens comprados
     items = result["items_to_buy"]
-    assert len(items) == 2  # Leite (98) e Feijao (22)
+    assert len(items) == 2  # Leite (98) e Cafe (22)
     assert all(item["quantity"] > 0 for item in items)
-    # Ordenado por line_cost decrescente
     assert items[0]["line_cost"] >= items[1]["line_cost"]
     assert items[0]["sku"] == "LEITE-UHT-1L"
     assert items[1]["sku"] == "CAFE-500G"
@@ -120,9 +187,6 @@ def test_end_to_end_optimization_pipeline_with_reference_scenario() -> None:
 
 def test_websocket_receives_progress_messages_with_increasing_generations() -> None:
     """Criterio 6: WebSocket recebe >= 2 mensagens de progresso com generation crescente."""
-    import json
-    import websockets.sync.client
-
     request_payload = {
         "budget_limit": 1000.0,
         "dataset_reference": "default",
@@ -158,8 +222,11 @@ def test_websocket_receives_progress_messages_with_increasing_generations() -> N
     except Exception as e:
         pytest.fail(f"Falha na conexao WebSocket {ws_url}: {e}")
 
-    assert len(received_messages) >= 2, f"Esperado >= 2 mensagens de progresso, recebido: {received_messages}"
+    assert len(received_messages) >= 2, (
+        f"Esperado >= 2 mensagens de progresso, recebido: {received_messages}"
+    )
     generations = [m["generation"] for m in received_messages]
     assert generations == sorted(generations)
     assert received_messages[-1]["status"] == "completed"
-
+    # FIX 3: Frame terminal completed possui fitness real > 0
+    assert received_messages[-1]["max_fitness"] > 0.0

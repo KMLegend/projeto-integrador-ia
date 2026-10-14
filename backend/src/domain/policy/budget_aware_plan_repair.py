@@ -14,10 +14,15 @@ class BudgetAwarePlanRepair:
     def repair(self, plan: PurchasePlan, scenario: ReplenishmentScenario) -> PurchasePlan:
         return self._fit_to_budget(plan.clamped_to(scenario.required_quantities()), scenario)
 
+    def _decrement_most_expensive(
+        self, plan: PurchasePlan, scenario: ReplenishmentScenario
+    ) -> PurchasePlan | None:
+        pos = scenario.most_expensive_position_among(plan.non_empty_positions())
+        return None if pos.is_absent() else plan.decremented_at(pos.value())
+
     def _fit_to_budget(self, plan: PurchasePlan, scenario: ReplenishmentScenario) -> PurchasePlan:
-        while self._budget.is_exceeded_by(scenario.total_cost_of(plan)):
-            most_expensive = scenario.most_expensive_position_among(plan.non_empty_positions())
-            if most_expensive.is_absent():
-                return plan
-            plan = plan.decremented_at(most_expensive.value())
+        while self._budget.is_exceeded_by(scenario.total_cost_of(plan)) and (
+            (next_p := self._decrement_most_expensive(plan, scenario)) is not None
+        ):
+            plan = next_p
         return plan

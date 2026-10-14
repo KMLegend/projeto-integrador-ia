@@ -105,19 +105,11 @@ class EvolutionOperators:
         policy: FitnessPolicy,
         parents_size: int = 20,
     ) -> "EvolutionOperators":
-        evaluation = EvaluationPipeline(
-            _policy=policy,
-            _selection=TruncationSelection(_parents_size=parents_size),
+        ev = EvaluationPipeline(policy, TruncationSelection(parents_size))
+        gp = GeneticPipeline(
+            UniformCrossover(random_source, repair), LocalShiftMutation(random_source, repair)
         )
-        genetic = GeneticPipeline(
-            _crossover=UniformCrossover(random_source, repair),
-            _mutation=LocalShiftMutation(random_source, repair),
-        )
-        variation = VariationOperators(
-            _factory=PlanFactory(random_source, repair),
-            _genetic=genetic,
-        )
-        return EvolutionOperators(evaluation, variation)
+        return EvolutionOperators(ev, VariationOperators(PlanFactory(random_source, repair), gp))
 
     def create_initial_population(
         self,
@@ -149,15 +141,23 @@ class EvolutionOperators:
         scenario: ReplenishmentScenario,
     ) -> Population:
         new_plans = list(parents.top(elite_size).plans())
-        num_parents = parents.size()
-        while len(new_plans) < target_size:
-            idx_a = self._variation.random_index_below(num_parents)
-            idx_b = self._variation.random_index_below(num_parents)
-            child = self._variation.breed_child(
-                parents.plan_at(idx_a), parents.plan_at(idx_b), scenario
-            )
-            new_plans.append(child)
+        self._fill_population(new_plans, parents, target_size, scenario)
         return Population.of_plans(new_plans)
+
+    def _fill_population(
+        self,
+        plans: list[PurchasePlan],
+        parents: Population,
+        target: int,
+        scenario: ReplenishmentScenario,
+    ) -> None:
+        while len(plans) < target:
+            plans.append(self._breed_one(parents, scenario))
+
+    def _breed_one(self, parents: Population, scenario: ReplenishmentScenario) -> PurchasePlan:
+        idx_a = self._variation.random_index_below(parents.size())
+        idx_b = self._variation.random_index_below(parents.size())
+        return self._variation.breed_child(parents.plan_at(idx_a), parents.plan_at(idx_b), scenario)
 
     def best_assessment(
         self,

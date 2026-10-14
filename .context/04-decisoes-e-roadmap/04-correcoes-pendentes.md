@@ -6,7 +6,7 @@ fonte-da-verdade: auditoria executada em 14/10/2026 contra a implementacao no di
 depende-de: [03-tasks-de-implementacao, 01-divergencias-e-decisoes]
 ---
 
-# Correções Pendentes (auditoria 14/10/2026 · revalidado após a conclusão)
+# Correções Pendentes (auditoria 14/10/2026 · 2 revalidações)
 
 Resultado da validação da implementação contra `03-tasks-de-implementacao.md` e `02-padroes-de-engenharia/`. Cada `FIX` é uma ordem de serviço autocontida, no mesmo formato das TASKs: um agente pega **um** FIX, corrige, prova pelo *Aceite* e para.
 
@@ -69,7 +69,7 @@ A primeira auditoria pegou a implementação **em andamento**. Esta revalidaçã
 
 | FIX | Assunto | Status |
 |---|---|---|
-| 1 | Tarefa não registrada: `404`/`4404` | 🔴 **EM ABERTO** — a rota ainda não grava `PROCESSING`; confirmado com worker parado |
+| 1 | Tarefa não registrada: `404`/`4404` | ✅ resolvido na rodada 2 — antes: **EM ABERTO** — a rota ainda não grava `PROCESSING`; confirmado com worker parado |
 | 2 | API trava ao recarregar com WebSocket aberto | 🔴 **EM ABERTO** — reproduzido: `/health` → HTTP 000 |
 | 3 | Frame terminal corrompe o gráfico | 🔴 **PIOROU** — sentinela migrou de `-1` para `generation=100`, `max_fitness` segue `0.0` |
 | 4 | `ruff check` 63 erros | ✅ **RESOLVIDO** — `All checks passed!` |
@@ -360,6 +360,92 @@ A variação real do fitness (803,22 → 816,92 = 13,7 pontos) passa a ocupar **
 ### Observação sobre o resumo de entrega (não é FIX)
 
 O resumo entregue no chat afirmou "**5 produtos** em risco" na baseline e identificou o produto em risco como "**Açúcar refinado**". Ambos estão errados: o valor medido é **2** na baseline e o produto em risco é o **Café 500g** (22 de 48 unidades; 26 descobertas). "Açúcar refinado" não existe no catálogo dos 6 produtos. O **código está correto** e o `04-relatorio-de-conformidade-final.md` registra "1 em risco" corretamente — o erro ficou restrito ao texto do resumo.
+
+---
+
+---
+
+## REVALIDAÇÃO 2 — após a rodada de correções
+
+**FIX 1 a FIX 18: todos resolvidos e verificados.** Confirmado por teste independente, não por relato.
+
+| FIX | Verificação executada | Status |
+|---|---|---|
+| 1 | Worker **parado**, 5 requisições: `/status` → `200 PROCESSING` 5/5 e WebSocket aceito 5/5 (antes: `404` determinístico) | ✅ |
+| 2 | WebSocket aberto + `touch` em `src/core/container.py`: recarregou e `/health` → `200` (antes: HTTP 000) | ✅ |
+| 3 | Frame terminal capturado ao vivo: `{"generation": 99, "max_fitness": 816.92, "status": "completed"}` — sem sentinela; eixo Y sairia `[793,22 · 826,92]` mesmo sem filtro | ✅ |
+| 13 | `tests/properties/test_domain_invariants.py` com 8 usos de `hypothesis` | ✅ |
+| 14 | **0 métodos acima de 5 linhas em `domain/`** (auditado por AST) | ✅ |
+| 15 | `dataset_reference` inválido → `422 UNKNOWN_DATASET` síncrono; `D-14` a `D-17` registrados no ADR | ✅ |
+| 16 | `06-baseline-e-indicadores.md` seção 3.2 corrigida com `history[0] = 803,22` e a ressalva do `RandomSource` | ✅ |
+| 17 | `test_immediate_status_and_websocket_after_accepted`, `test_unknown_dataset_returns_422_synchronously`, `test_nonexistent_task_returns_404_and_websocket_4404`; 6 e2e passam | ✅ |
+| 18 | Relatório cita `D-01` a `D-17`, todos existentes no ADR, zero IDs inventados, todos os links resolvem | ✅ |
+
+**Portões:** `ruff format` · `ruff check` · `mypy --strict` (119 arquivos) · `lint-imports` 3/3 · `check_calisthenics.sh` · `pytest` 107 passed 1 skipped · cobertura domínio **95,79%** · global **89,50%** · frontend `tsc`/`eslint`/28 testes — **todos verdes**.
+
+**Valores-ouro com o payload padrão:** R$ 987,44 · 98,7% · 120/146 · 82,2% · 1 em risco · 816,92 · baseline 314,32 / 36 / 24,7% / 2 / 236,58 · MAE 4,76 — **todos preservados**.
+
+Pendências menores remanescentes do FIX 14: `ClassifyStockRisk._assess_snapshot` ([classify_stock_risk.py:28](backend/src/application/use_cases/classify_stock_risk.py:28)) e `CompareReplenishmentStrategies._assess_plan` ([compare_replenishment_strategies.py:78](backend/src/application/use_cases/compare_replenishment_strategies.py:78)) têm 6 linhas sem comentário `# OC-8`. Os outros 16 métodos acima do limite em `application/` estão justificados.
+
+---
+
+### FIX 19 — CRÍTICO: `budget_limit` e `ga_parameters` da requisição são ignorados
+
+- **Severidade:** 🔴 **Crítico — viola RN-05, a restrição central do sistema** · **Origem:** TASK 24, TASK 27 · **Não detectado nas auditorias anteriores** (ver nota ao final)
+- **Evidência (reproduzível):**
+
+  ```bash
+  curl -s -X POST localhost:8000/api/v1/optimize -H 'Content-Type: application/json'     -d '{"budget_limit":1.00,"dataset_reference":"historico_mensal_v1","ga_parameters":{"population_size":60,"generations":100}}'
+  ```
+
+  Medições:
+
+  | Parâmetro pedido | Valor usado de fato |
+  |---|---|
+  | `budget_limit` R$ 1,00 / 100,00 / 500,00 / 1000,00 / 2000,00 | **sempre R$ 1.000,00** — custo R$ 987,44 em todos os casos |
+  | `ga_parameters.generations` 5 / 20 / 100 | **sempre 100** — `convergence_curve` com 100 pontos nos três |
+  | `ga_parameters.random_seed` 1 / 999 | **sempre 42** — `history[0] = 803,22` idêntico |
+  | `cycle_weeks` 1 / 4 / 8 | respeitado (`required_total` 0 / 146 / 1310) |
+  | `dataset_reference` | respeitado (`422` para desconhecido) |
+
+  Resposta com `budget_limit: 1.00`:
+
+  ```json
+  {"budget_limit": 1.0, "total_cost": 987.44, "budget_usage_ratio": 98744.0}
+  ```
+
+  O sistema gasta **987× o orçamento pedido** e devolve um KPI de 98.744% de uso do orçamento, que vai direto para o card da UI.
+
+- **Causa raiz:** [container.py:111](backend/src/core/container.py:111) e [container.py:115](backend/src/core/container.py:115) montam o motor a partir da **configuração de ambiente**, nunca da requisição:
+
+  ```python
+  budget = BudgetConstraint.from_reais(settings.default_budget_limit)   # <- env, nao a request
+  engine_settings = EvolutionSettings.notebook_defaults()               # <- defaults fixos
+  ```
+
+  `OptimizationRequest` **já expõe** os conversores corretos — [to_budget_constraint()](backend/src/application/dto/optimization_request.py:26) e [to_evolution_settings()](backend/src/application/dto/optimization_request.py:31) — e **nenhum dos dois é chamado em lugar algum**. São código morto. `grep -rn "to_evolution_settings\|request.budget" src/core src/application/use_cases src/infrastructure/tasks` não retorna nada.
+
+- **Impacto:**
+  1. Viola RN-05 e a invariante 4 de `01-dominio-e-negocio/02-regras-de-negocio.md` (`total_cost ≤ budget_limit`) — a regra que dá sentido ao projeto, que existe para alocar orçamento limitado.
+  2. Os campos de orçamento, população, gerações e semente do `OptimizationForm` são **decorativos**: mudar qualquer um deles não altera o resultado.
+  3. `budget_usage_ratio` fica absurdo (98.744%), quebrando o KPI card.
+  4. A defesa oral fica exposta: basta a banca pedir "e com R$ 500?" para o sistema devolver um plano de R$ 987,44.
+
+- **Fazer:**
+  1. `build_optimization_use_case` deve receber a `OptimizationRequest` (ou o `BudgetConstraint` e o `EvolutionSettings` já derivados dela) e usar `request.to_budget_constraint()` e `request.to_evolution_settings()` em vez de `settings.default_budget_limit` e `EvolutionSettings.notebook_defaults()`. Os valores de `settings` passam a ser apenas o **default** quando o campo é omitido no payload — que é o que D-05 já determina.
+  2. Propagar o mesmo `BudgetConstraint` para `BudgetAwarePlanRepair`, `CompareReplenishmentStrategies` e `NaiveReplenishmentPolicy`, para que baseline e plano otimizado sejam avaliados sob o mesmo teto.
+  3. Remover o código morto apenas se de fato não for usado após a correção — o esperado é o oposto: ele passa a ser o caminho principal.
+
+- **Aceite:**
+  1. `budget_limit` R$ 100,00 ⇒ `total_cost ≤ 100,00` e `budget_usage_ratio ≤ 100`.
+  2. `budget_limit` R$ 1,00 ⇒ plano todo zero, `total_cost` R$ 0,00, sem erro.
+  3. `generations = 5` ⇒ `convergence_curve` com **5** pontos.
+  4. `random_seed` 1 e 999 ⇒ `history[0]` **diferentes** entre si.
+  5. `population_size`, `mutation_rate`, `parents_size` e `elite_size` refletidos no comportamento (teste de unidade sobre `to_evolution_settings`).
+  6. Payload padrão (R$ 1.000,00 / 60 / 100 / semente 42) **continua** reproduzindo os valores-ouro: 987,44 e 816,92.
+  7. Teste e2e parametrizado por orçamento, afirmando `total_cost ≤ budget_limit` em cada caso — é a asserção que faltava.
+
+> **Nota honesta sobre por que isso passou.** Nas duas auditorias anteriores eu sempre usei o payload dos valores-ouro (R$ 1.000,00 / 60 / 100 / semente 42) — exatamente a combinação em que os parâmetros da requisição **coincidem** com os defaults do ambiente. Validar só o caminho que reproduz o número esperado esconde justamente esta classe de defeito. A suíte e2e tem o mesmo ponto cego: nenhum dos 6 testes varia orçamento ou parâmetros do AG. O aceite 7 acima fecha essa lacuna.
 
 ---
 

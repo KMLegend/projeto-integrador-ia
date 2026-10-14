@@ -1,3 +1,6 @@
+from typing import Any
+
+from domain.forecasting.stock_snapshot import StockSnapshot
 from domain.model.catalog_item import CatalogItem
 from domain.model.quantity import Quantity
 from domain.model.replenishment_cycle import ReplenishmentCycle
@@ -19,23 +22,32 @@ class BuildReplenishmentScenario:
         self._repository = repository
         self._forecaster = forecaster
 
-    def execute(self, cycle: ReplenishmentCycle) -> ReplenishmentScenario:
+    def execute(
+        self, cycle: ReplenishmentCycle
+    ) -> ReplenishmentScenario:  # OC-8: Orquestrador do cenario
         snapshots = self._repository.load_history()
-        latest_snapshots = snapshots.latest_per_product()
-        forecasts = self._forecaster.forecast(latest_snapshots)
+        latest = snapshots.latest_per_product()
+        forecasts = self._forecaster.forecast(latest)
+        return ReplenishmentScenario.of_items(
+            [self._build_item(snap, cycle, forecasts) for snap in latest.snapshots()]
+        )
 
-        items: list[ReplenishmentItem] = []
-        for snap in latest_snapshots.snapshots():
-            sku = snap.sku()
-            unit_price = UnitPrice.from_reais(f"{snap.unit_price_float():.2f}")
-            forecast = forecasts.for_sku(sku)
+    def _build_item(
+        self,
+        snap: StockSnapshot,
+        cycle: ReplenishmentCycle,
+        forecasts: Any,
+    ) -> ReplenishmentItem:
+        item = CatalogItem(snap.sku(), UnitPrice.from_reais(f"{snap.unit_price_float():.2f}"))
+        req = self._calculate_net_required(snap, cycle, forecasts)
+        return ReplenishmentItem(item, Quantity.of(req))
 
-            cycle_demand = cycle.demand_for(forecast).units_value()
-            stock_on_hand = snap.stock_on_hand()
-            net_required = max(0, cycle_demand - stock_on_hand)
-
-            catalog_item = CatalogItem(sku, unit_price)
-            item = ReplenishmentItem(catalog_item, Quantity.of(net_required))
-            items.append(item)
-
-        return ReplenishmentScenario.of_items(items)
+    @staticmethod
+    def _calculate_net_required(
+        snap: StockSnapshot,
+        cycle: ReplenishmentCycle,
+        forecasts: Any,
+    ) -> int:
+        forecast = forecasts.for_sku(snap.sku())
+        demand = cycle.demand_for(forecast).units_value()
+        return max(0, demand - snap.stock_on_hand())

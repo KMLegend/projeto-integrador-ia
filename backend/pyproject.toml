@@ -72,3 +72,6 @@ pythonpath = ["src", "."]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = "-ra -q --cov=src --cov-report=term-missing"
+markers = [
+    "e2e: testes ponta a ponta no Docker Compose",
+]

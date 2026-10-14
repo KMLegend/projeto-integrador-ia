@@ -37,12 +37,15 @@ class Population:
         policy: FitnessPolicy,
         scenario: ReplenishmentScenario,
     ) -> "Population":
-        sorted_plans = sorted(
-            self._plans,
-            key=lambda plan: policy.evaluate(plan, scenario).fitness_value(),
-            reverse=True,
+        ordered = self._sort_plans(policy, scenario)
+        return Population(tuple(ordered))
+
+    def _sort_plans(
+        self, policy: FitnessPolicy, scenario: ReplenishmentScenario
+    ) -> list[PurchasePlan]:
+        return sorted(
+            self._plans, key=lambda p: policy.evaluate(p, scenario).fitness_value(), reverse=True
         )
-        return Population(tuple(sorted_plans))
 
     def top(
         self,

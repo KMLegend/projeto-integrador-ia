@@ -22,13 +22,16 @@ class Money:
 
     @staticmethod
     def from_reais(amount: str | Decimal) -> "Money":
+        Money._validate_raw_amount(amount)
+        cents = int((Decimal(amount) * Decimal("100")).to_integral_value(rounding=ROUND_HALF_EVEN))
+        return Money(cents)
+
+    @staticmethod
+    def _validate_raw_amount(amount: object) -> None:
         if isinstance(amount, float):
             raise InvalidMoneyError("Construir Money a partir de float e proibido (D-03)")
         if not isinstance(amount, (str, Decimal)):
             raise InvalidMoneyError("Entrada deve ser str ou Decimal")
-        decimal_val = Decimal(amount)
-        cents = int((decimal_val * Decimal("100")).to_integral_value(rounding=ROUND_HALF_EVEN))
-        return Money(cents)
 
     @staticmethod
     def zero() -> "Money":

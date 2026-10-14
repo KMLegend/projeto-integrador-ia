@@ -47,23 +47,29 @@ export function useProgressSocket(
       taskId,
       (msg: ProgressMessage) => {
         setIsConnected(true);
-        setCurrentGeneration(msg.generation);
         setStatus(msg.status);
 
-        setPoints((prev) => {
-          if (observedGenerations.current.has(msg.generation)) {
-            return prev.map((p) =>
-              p.generation === msg.generation
-                ? { generation: msg.generation, max_fitness: msg.max_fitness }
-                : p
-            );
-          }
-          observedGenerations.current.add(msg.generation);
-          return [
-            ...prev,
-            { generation: msg.generation, max_fitness: msg.max_fitness },
-          ];
-        });
+        if (msg.generation >= 0) {
+          setCurrentGeneration(msg.generation);
+        }
+
+        // D-09 / FIX 3: Ignore sentinel or non-positive fitness values from polluting chart points
+        if (msg.generation >= 0 && msg.max_fitness > 0) {
+          setPoints((prev) => {
+            if (observedGenerations.current.has(msg.generation)) {
+              return prev.map((p) =>
+                p.generation === msg.generation
+                  ? { generation: msg.generation, max_fitness: msg.max_fitness }
+                  : p
+              );
+            }
+            observedGenerations.current.add(msg.generation);
+            return [
+              ...prev,
+              { generation: msg.generation, max_fitness: msg.max_fitness },
+            ];
+          });
+        }
       },
       () => {
         setIsConnected(false);
