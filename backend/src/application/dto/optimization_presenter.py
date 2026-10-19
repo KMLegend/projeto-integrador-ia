@@ -1,20 +1,12 @@
 from typing import Any
 
+from application.dto.dataset_context import DatasetContext
 from application.dto.optimization_outcome import OptimizationOutcome
 from application.dto.optimization_request import OptimizationRequest
 from domain.forecasting.feature_schema import FeatureSchema
 from domain.model.position import Position
 from domain.model.purchase_plan import PurchasePlan
 from domain.model.replenishment_scenario import ReplenishmentScenario
-
-PRODUCT_NAMES_BY_SKU: dict[str, str] = {
-    "ARROZ-5KG": "Arroz 5kg",
-    "CAFE-500G": "Café 500g",
-    "DETERGENTE-500ML": "Detergente 500ml",
-    "FEIJAO-1KG": "Feijão 1kg",
-    "LEITE-UHT-1L": "Leite UHT 1L",
-    "REFRIGERANTE-2L": "Refrigerante 2L",
-}
 
 
 class OptimizationPresenter:
@@ -26,6 +18,7 @@ class OptimizationPresenter:
         scenario: ReplenishmentScenario,
         evolution_result: Any,
         comparison: Any,
+        context: DatasetContext | None = None,
     ) -> OptimizationOutcome:
         return OptimizationOutcome.completed(
             task_id=request.task_id,
@@ -33,18 +26,19 @@ class OptimizationPresenter:
                 request, scenario, comparison.optimized
             ),
             items_to_buy=OptimizationPresenter.build_items_to_buy(
-                evolution_result.best_plan(), scenario
+                evolution_result.best_plan(), scenario, context
             ),
             baseline_comparison=comparison.to_dict(),
             convergence_curve=[
                 r.value_for_serialization() for r in evolution_result.convergence_curve()
             ],
-            model_metrics=OptimizationPresenter.build_model_metrics(),
+            model_metrics=OptimizationPresenter.build_model_metrics(context),
         )
 
     @staticmethod
-    def build_model_metrics() -> dict[str, Any]:
-        return {"mae": 4.76, "features": list(FeatureSchema.ORDERED_NAMES)}
+    def build_model_metrics(context: DatasetContext | None = None) -> dict[str, Any]:
+        mae = round(context.model_mae, 2) if context is not None else 0.0
+        return {"mae": mae, "features": list(FeatureSchema.ORDERED_NAMES)}
 
     @staticmethod
     def build_summary(  # OC-8: Montagem de dicionario de resumo com 8 campos de KPI
@@ -72,10 +66,11 @@ class OptimizationPresenter:
     def build_items_to_buy(  # OC-8: Compreensao de lista e ordenacao decrescente
         plan: PurchasePlan,
         scenario: ReplenishmentScenario,
+        context: DatasetContext | None = None,
     ) -> list[dict[str, Any]]:
         items = [
             OptimizationPresenter._create_item_line(
-                Position(i), plan.quantity_at(Position(i)).units_value(), scenario
+                Position(i), plan.quantity_at(Position(i)).units_value(), scenario, context
             )
             for i in range(scenario.size())
             if plan.quantity_at(Position(i)).units_value() > 0
@@ -87,6 +82,7 @@ class OptimizationPresenter:
         pos: Position,
         qty: int,
         scenario: ReplenishmentScenario,
+        context: DatasetContext | None = None,
     ) -> dict[str, Any]:
         item = scenario.item_at(pos)
         sku = item.sku().value_for_serialization()
@@ -94,7 +90,7 @@ class OptimizationPresenter:
         unit_cost = float(item.unit_price().value_for_serialization())
         return {
             "sku": sku,
-            "product": PRODUCT_NAMES_BY_SKU.get(sku, sku),
+            "product": context.name_for(sku) if context is not None else sku,
             "quantity": qty,
             "unit_cost": unit_cost,
             "required_quantity": req,

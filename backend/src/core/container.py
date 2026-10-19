@@ -1,7 +1,11 @@
+from pathlib import Path
+
 from application.decorators.throttled_evolution_observer import (
     ThrottleConfig,
     ThrottledEvolutionObserver,
 )
+from application.dto.optimization_request import OptimizationRequest
+from application.ports.dataset_catalog import DatasetCatalog
 from application.ports.progress_publisher import ProgressPublisher
 from application.ports.progress_subscriber import ProgressSubscriber
 from application.ports.task_result_store import TaskResultStore
@@ -16,7 +20,7 @@ from application.use_cases.optimize_replenishment import (
     OptimizeReplenishment,
 )
 from application.use_cases.read_optimization_status import ReadOptimizationStatus
-from core.config import Settings
+from core.config import Settings, get_settings
 from domain.errors.domain_errors import UnknownDatasetError
 from domain.evolution.evolution_engine import EvolutionEngine
 from domain.evolution.evolution_operators import EvolutionOperators
@@ -31,29 +35,61 @@ from domain.ports.demand_forecaster import DemandForecaster
 from domain.ports.evolution_observer import EvolutionObserver
 from domain.ports.stock_history_repository import StockHistoryRepository
 
+BUILTIN_DATASET_REFERENCES = ("historico_mensal_v1", "default")
 
-def build_stock_history_repository(dataset_reference: str) -> StockHistoryRepository:
-    """Resolve identificador logico para implementacao de repositorio (D-07)."""
-    if dataset_reference in ("historico_mensal_v1", "default"):
+
+def build_dataset_catalog(settings: Settings) -> DatasetCatalog:
+    """Constroi o catalogo de datasets persistido em volume compartilhado."""
+    from infrastructure.dataset.filesystem_dataset_catalog import FilesystemDatasetCatalog
+
+    return FilesystemDatasetCatalog(settings.dataset_store_path)
+
+
+def build_stock_history_repository(
+    dataset_reference: str,
+    settings: Settings | None = None,
+) -> StockHistoryRepository:
+    """Resolve identificador logico para implementacao de repositorio (D-07, D-18)."""
+    if dataset_reference in BUILTIN_DATASET_REFERENCES:
         from infrastructure.dataset.simulated_stock_history_repository import (
             SimulatedStockHistoryRepository,
         )
 
         return SimulatedStockHistoryRepository()
-    raise UnknownDatasetError(f"Referencia de dataset desconhecida: {dataset_reference}")
+
+    catalog = build_dataset_catalog(settings or get_settings())
+    csv_path = catalog.path_for(dataset_reference)
+    if csv_path is None:
+        raise UnknownDatasetError(f"Referencia de dataset desconhecida: {dataset_reference}")
+
+    from infrastructure.dataset.csv_stock_history_repository import CsvStockHistoryRepository
+
+    return CsvStockHistoryRepository(csv_path)
 
 
-def build_demand_forecaster(settings: Settings) -> DemandForecaster:
-    """Constroi o forecaster lazy com cache em processo e memoizacao por SKU."""
+def _model_path_for(settings: Settings, dataset_reference: str) -> str:
+    """Artefato por dataset: o embutido mantem o caminho padrao (compatibilidade)."""
+    default_path = Path(settings.model_store_path)
+    if dataset_reference in BUILTIN_DATASET_REFERENCES:
+        return str(default_path)
+    return str(default_path.with_name(f"forecaster_{dataset_reference}.joblib"))
+
+
+def build_demand_forecaster(
+    settings: Settings,
+    repository: StockHistoryRepository | None = None,
+    dataset_reference: str = "historico_mensal_v1",
+) -> DemandForecaster:
+    """Constroi o forecaster lazy, treinado sobre o dataset selecionado (D-18)."""
     from infrastructure.dataset.simulated_stock_history_repository import (
         SimulatedStockHistoryRepository,
     )
     from infrastructure.forecasting.cached_demand_forecaster import CachedDemandForecaster
     from infrastructure.forecasting.model_store import ModelStore
 
-    store = ModelStore(settings.model_store_path)
+    store = ModelStore(_model_path_for(settings, dataset_reference))
     base_forecaster = store.get_or_train_forecaster(
-        SimulatedStockHistoryRepository(),
+        repository or SimulatedStockHistoryRepository(),
         seed=settings.default_random_seed,
     )
     return CachedDemandForecaster(base_forecaster)
@@ -97,22 +133,37 @@ def build_evolution_observer(
 def build_optimization_use_case(
     settings: Settings,
     dataset_reference: str = "historico_mensal_v1",
+    request: OptimizationRequest | None = None,
 ) -> OptimizeReplenishment:
     """Composicao completa do caso de uso de otimizacao genetica."""
     from infrastructure.randomness.seeded_random_source import SeededRandomSource
 
-    repository = build_stock_history_repository(dataset_reference)
-    forecaster = build_demand_forecaster(settings)
+    target_dataset = request.dataset_reference if request is not None else dataset_reference
+    repository = build_stock_history_repository(target_dataset, settings)
+    forecaster = build_demand_forecaster(settings, repository, target_dataset)
     build_scenario = BuildReplenishmentScenario(repository, forecaster)
 
-    random_source = SeededRandomSource(settings.default_random_seed)
+    budget = (
+        request.to_budget_constraint()
+        if request is not None
+        else BudgetConstraint.from_reais(settings.default_budget_limit)
+    )
+    engine_settings = (
+        request.to_evolution_settings()
+        if request is not None
+        else EvolutionSettings.notebook_defaults()
+    )
+    random_source = SeededRandomSource(engine_settings.random_seed)
     coverage_calc = CoverageCalculator()
     fitness_policy = WeightedFitnessPolicy.standard()
-    budget = BudgetConstraint.from_reais(settings.default_budget_limit)
     repair = BudgetAwarePlanRepair(budget)
 
-    operators = EvolutionOperators.standard(random_source, repair, fitness_policy)
-    engine_settings = EvolutionSettings.notebook_defaults()
+    operators = EvolutionOperators.standard(
+        random_source,
+        repair,
+        fitness_policy,
+        parents_size=engine_settings.parents_size,
+    )
     engine = EvolutionEngine(engine_settings, operators)
 
     naive_policy = NaiveReplenishmentPolicy(repair)

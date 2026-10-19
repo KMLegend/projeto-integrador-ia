@@ -1,3 +1,4 @@
+import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useProgressSocket } from '../useProgressSocket';
@@ -87,5 +88,46 @@ describe('useProgressSocket', () => {
 
     expect(result.current.isSocketFailed).toBe(true);
     expect(result.current.isConnected).toBe(false);
+  });
+});
+
+describe('useProgressSocket sob React.StrictMode', () => {
+  it('acumula pontos mesmo com o updater invocado duas vezes', () => {
+    const fakeChannel = new FakeProgressChannel();
+    const taskId = 'task-strictmode';
+
+    // StrictMode invoca os updaters de estado duas vezes em desenvolvimento.
+    // Antes da correcao, o efeito colateral dentro do updater fazia a segunda
+    // invocacao descartar todo ponto novo e o grafico ficava permanentemente vazio.
+    const { result } = renderHook(() => useProgressSocket(taskId, fakeChannel), {
+      wrapper: ({ children }) => <React.StrictMode>{children}</React.StrictMode>,
+    });
+
+    act(() => {
+      fakeChannel.emitProgress(taskId, { generation: 0, max_fitness: 803.22, status: 'evolving' });
+      fakeChannel.emitProgress(taskId, { generation: 10, max_fitness: 816.92, status: 'evolving' });
+    });
+
+    expect(result.current.points).toEqual([
+      { generation: 0, max_fitness: 803.22 },
+      { generation: 10, max_fitness: 816.92 },
+    ]);
+  });
+
+  it('atualiza no lugar quando a mesma geracao chega de novo', () => {
+    const fakeChannel = new FakeProgressChannel();
+    const taskId = 'task-dedupe';
+
+    const { result } = renderHook(() => useProgressSocket(taskId, fakeChannel), {
+      wrapper: ({ children }) => <React.StrictMode>{children}</React.StrictMode>,
+    });
+
+    act(() => {
+      fakeChannel.emitProgress(taskId, { generation: 99, max_fitness: 800.0, status: 'evolving' });
+      fakeChannel.emitProgress(taskId, { generation: 99, max_fitness: 816.92, status: 'completed' });
+    });
+
+    expect(result.current.points).toEqual([{ generation: 99, max_fitness: 816.92 }]);
+    expect(result.current.status).toBe('completed');
   });
 });

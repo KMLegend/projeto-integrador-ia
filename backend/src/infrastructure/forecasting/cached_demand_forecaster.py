@@ -36,3 +36,7 @@ class CachedDemandForecaster(DemandForecaster):
 
     def clear_cache(self) -> None:
         self._cache.clear()
+
+    def training_mae(self) -> float:
+        inner = getattr(self._inner, "training_mae", None)
+        return float(inner()) if callable(inner) else 0.0

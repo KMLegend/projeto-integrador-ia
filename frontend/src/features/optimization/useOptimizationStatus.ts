@@ -25,6 +25,10 @@ export function useOptimizationStatus(
       }
       return false;
     },
+    // Sem isto, o TanStack pausa o intervalo quando a aba fica oculta; como o
+    // QueryClient desliga refetchOnWindowFocus, a tela nunca se recuperaria ao
+    // voltar e ficaria presa em "processando" com a tarefa ja concluida.
+    refetchIntervalInBackground: true,
     staleTime: (query) => {
       const status = query.state.data?.status;
       if (status === 'COMPLETED' || status === 'FAILED') {

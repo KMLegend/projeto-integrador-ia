@@ -1,5 +1,6 @@
 from typing import Any
 
+from application.dto.dataset_context import DatasetContext
 from domain.forecasting.stock_snapshot import StockSnapshot
 from domain.model.catalog_item import CatalogItem
 from domain.model.quantity import Quantity
@@ -22,15 +23,28 @@ class BuildReplenishmentScenario:
         self._repository = repository
         self._forecaster = forecaster
 
-    def execute(
+    def execute(self, cycle: ReplenishmentCycle) -> ReplenishmentScenario:
+        return self.execute_with_context(cycle)[0]
+
+    def execute_with_context(  # OC-8: Orquestrador do cenario com metadados do dataset
         self, cycle: ReplenishmentCycle
-    ) -> ReplenishmentScenario:  # OC-8: Orquestrador do cenario
-        snapshots = self._repository.load_history()
-        latest = snapshots.latest_per_product()
+    ) -> tuple[ReplenishmentScenario, DatasetContext]:
+        latest = self._repository.load_history().latest_per_product()
         forecasts = self._forecaster.forecast(latest)
-        return ReplenishmentScenario.of_items(
+        scenario = ReplenishmentScenario.of_items(
             [self._build_item(snap, cycle, forecasts) for snap in latest.snapshots()]
         )
+        return scenario, self._context_for(latest)
+
+    def _context_for(self, latest: Any) -> DatasetContext:
+        names = {
+            snap.sku().value_for_serialization(): snap.product_name() for snap in latest.snapshots()
+        }
+        return DatasetContext(model_mae=self._model_mae(), product_names=names)
+
+    def _model_mae(self) -> float:
+        provider = getattr(self._forecaster, "training_mae", None)
+        return float(provider()) if callable(provider) else 0.0
 
     def _build_item(
         self,

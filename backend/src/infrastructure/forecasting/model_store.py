@@ -47,7 +47,9 @@ class ModelStore:
             if not self._is_payload_valid(payload):
                 logger.warning("Artefato de modelo incompativel com schema atual. Descartando.")
                 return None
-            return LinearRegressionDemandForecaster(payload["model"])
+            return LinearRegressionDemandForecaster(
+                payload["model"], float(payload.get("train_mae", 0.0))
+            )
         except Exception as err:
             logger.warning("Falha ao carregar artefato de modelo (%s). Descartando.", err)
             return None

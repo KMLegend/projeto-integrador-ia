@@ -230,3 +230,39 @@ def test_websocket_receives_progress_messages_with_increasing_generations() -> N
     assert received_messages[-1]["status"] == "completed"
     # FIX 3: Frame terminal completed possui fitness real > 0
     assert received_messages[-1]["max_fitness"] > 0.0
+
+
+@pytest.mark.parametrize("budget_limit", [1.0, 100.0, 500.0, 1000.0])
+def test_e2e_optimization_strictly_respects_budget_limit(budget_limit: float) -> None:
+    """FIX 19: Otimizacao respeita estritamente o budget_limit (RN-05)."""
+    api_url, _ = get_base_urls()
+    start_resp = httpx.post(
+        f"{api_url}/api/v1/optimize",
+        json={
+            "budget_limit": budget_limit,
+            "dataset_reference": "default",
+            "ga_parameters": {"population_size": 20, "generations": 5, "random_seed": 42},
+        },
+        timeout=10.0,
+    )
+    assert start_resp.status_code == 202
+    task_id = start_resp.json()["task_id"]
+
+    deadline = time.time() + 30.0
+    completed_data = None
+    while time.time() < deadline:
+        status_resp = httpx.get(f"{api_url}/api/v1/status/{task_id}", timeout=10.0)
+        assert status_resp.status_code == 200
+        current_status = status_resp.json()
+        if current_status["status"] == "COMPLETED":
+            completed_data = current_status
+            break
+        if current_status["status"] == "FAILED":
+            pytest.fail(f"Tarefa de otimizacao falhou: {current_status}")
+        time.sleep(0.5)
+
+    assert completed_data is not None, f"Otimizacao com budget {budget_limit} nao concluiu a tempo."
+    summary = completed_data["result"]["best_scenario_summary"]
+    assert summary["budget_limit"] == budget_limit
+    assert summary["total_cost"] <= budget_limit
+    assert summary["budget_usage_ratio"] <= 100.0

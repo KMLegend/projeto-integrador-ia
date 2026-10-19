@@ -40,21 +40,24 @@ class OptimizationRequest:  # OC-8: DTO de entrada para caso de uso de otimizaca
         )
 
     @staticmethod
-    def from_payload(
+    def from_payload(  # OC-8: Desserializacao de payload da API
         payload: dict[str, Any],
-    ) -> "OptimizationRequest":  # OC-8: Desserializacao de payload da API
+        default_budget: float = 1000.00,
+        default_cycle: int = 4,
+        default_seed: int = 42,
+    ) -> "OptimizationRequest":
         ga_params = payload.get("ga_parameters") or {}
 
         return OptimizationRequest(
             task_id=str(payload.get("task_id", "default-task")),
-            budget_limit=float(payload.get("budget_limit", 1000.00)),
+            budget_limit=float(payload.get("budget_limit", default_budget)),
             dataset_reference=str(payload.get("dataset_reference", "historico_mensal_v1")),
-            cycle_weeks=int(payload.get("cycle_weeks", 4)),
+            cycle_weeks=int(payload.get("cycle_weeks", default_cycle)),
             population_size=int(ga_params.get("population_size", 60)),
             generations=int(ga_params.get("generations", 100)),
             mutation_rate=float(ga_params.get("mutation_rate", 0.20)),
             parents_size=int(ga_params.get("parents_size", 20)),
             elite_size=int(ga_params.get("elite_size", 2)),
             mutation_range=int(ga_params.get("mutation_range", 10)),
-            random_seed=int(ga_params.get("random_seed", 42)),
+            random_seed=int(ga_params.get("random_seed", default_seed)),
         )

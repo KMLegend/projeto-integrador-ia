@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://redis_broker:6379/0"
     redis_result_url: str = "redis://redis_broker:6379/1"
     model_store_path: str = "/app/models/demand_forecaster.joblib"
+    dataset_store_path: str = "/app/datasets"
     default_budget_limit: str = "1000.00"
     default_cycle_weeks: int = 4
     default_random_seed: int = 42

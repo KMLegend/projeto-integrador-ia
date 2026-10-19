@@ -39,14 +39,16 @@ class OptimizeReplenishment:
         request: OptimizationRequest,
         observer: EvolutionObserver | None = None,
     ) -> OptimizationOutcome:
-        scenario = self._engines.build_scenario.execute(request.to_replenishment_cycle())
+        scenario, context = self._engines.build_scenario.execute_with_context(
+            request.to_replenishment_cycle()
+        )
         obs = observer or NullEvolutionObserver()
         evolution_result = self._engines.evolution_engine.evolve(scenario, obs)
         comparison = self._engines.compare_strategies.execute(
             scenario, evolution_result.best_plan()
         )
         outcome = OptimizationPresenter.build_outcome(
-            request, scenario, evolution_result, comparison
+            request, scenario, evolution_result, comparison, context
         )
         self._result_store.save(TaskId.of(request.task_id), outcome)
         return outcome

@@ -82,3 +82,20 @@ class StatusResponseSchema(BaseModel):
     status: str
     result: OptimizationResultSchema | None = None
     error: dict[str, str] | None = None
+
+
+class DatasetSummaryResponse(BaseModel):
+    """Resumo de um dataset disponivel para otimizacao."""
+
+    reference: str
+    rows: int
+    skus: int
+    uploaded_at: str
+    is_builtin: bool
+
+
+class DatasetListResponse(BaseModel):
+    """Lista de datasets e o schema de colunas exigido no upload."""
+
+    datasets: list[DatasetSummaryResponse]
+    required_columns: list[str]

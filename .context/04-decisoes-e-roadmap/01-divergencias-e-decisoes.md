@@ -1,4 +1,4 @@
----
+C:\caddyserver\caddy_windows_amd64.exe reload --config C:\caddyserver\Caddyfile---
 id: 01-divergencias-e-decisoes
 dominio: decisoes
 palavras-chave: ADR, decisoes de arquitetura, divergencias, conflitos, lucro, profit, DEAP, pygad, dinheiro, float, centavos, versionamento
@@ -160,6 +160,29 @@ Motivos: (a) fidelidade exata aos valores apresentados à banca, incluindo o rep
 **Decisão.** Adotar layout plano por feature (`features/<feature>/Component.tsx`, `useHook.ts`, `__tests__/`), removendo subdiretórios redundantes e vazios.
 
 **Consequência.** Organização mais simples e legível, imports diretos e conformidade com o princípio de simplicidade.
+
+## D-18 — Ingestão de datasets pelo usuário (revoga a exclusão de escopo)
+
+**Contexto.** O roadmap listava "dados reais de ERP (D-07)" em *Evoluções fora do escopo atual*, e a D-07 mandava devolver `422` para qualquer referência diferente de `historico_mensal_v1`. Na validação da interface ficou claro que o requisito **era** poder carregar qualquer dataset padronizado e otimizar sobre ele — o spec simplesmente não registrou isso, então nenhuma das 41 TASKs pediu a funcionalidade.
+
+**Decisão.** `dataset_reference` passa a resolver em duas etapas:
+
+| Valor | Resolve para |
+|---|---|
+| `historico_mensal_v1`, `default` | `SimulatedStockHistoryRepository` (120 registros, semente 42) |
+| Referência presente no catálogo | `CsvStockHistoryRepository` sobre o CSV persistido |
+| Qualquer outra | `422 UNKNOWN_DATASET` (regra da D-07, preservada) |
+
+Componentes: porta `DatasetCatalog` (`application/ports/`, consumidor-dono, coerente com D-14), adaptador `FilesystemDatasetCatalog` em volume `dataset_store` compartilhado entre API e worker, `CsvDatasetSchema` validando as 3 colunas de identificação + as 5 features + o alvo, e as rotas `GET /api/v1/datasets` e `POST /api/v1/datasets`. CSV inválido → `422 INVALID_DATASET`.
+
+**Consequências.**
+1. O modelo de previsão passa a ser **treinado por dataset** (artefato `forecaster_<referência>.joblib`); o embutido mantém o caminho padrão, preservando os valores-ouro.
+2. O MAE exibido deixa de ser a constante `4.76` codificada em `optimization_presenter.py` e passa a vir do artefato treinado (`train_mae`). Dataset embutido continua 4,76; `varejo_60skus` reporta 4,09.
+3. O nome do produto deixa de vir do mapa fixo `PRODUCT_NAMES_BY_SKU` (que só conhecia os 6 SKUs embutidos e exibia o código para os demais) e passa a vir da coluna `product` do dataset, via `DatasetContext`.
+4. Colunas extras no CSV (ex.: `category`) são aceitas e ignoradas.
+5. Nova dependência: `python-multipart` (exigida pelo FastAPI para upload), fixada em `requirements.txt`.
+
+> Esta decisão **revoga** a linha "dados reais de ERP (D-07)" da seção *Evoluções fora do escopo atual* do roadmap.
 
 ---
 

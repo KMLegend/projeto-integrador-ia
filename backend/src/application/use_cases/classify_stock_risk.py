@@ -25,7 +25,9 @@ class ClassifyStockRisk:
         forecasts = self._forecaster.forecast(latest)
         return tuple(self._assess_snapshot(snap, forecasts) for snap in latest.snapshots())
 
-    def _assess_snapshot(self, snap: StockSnapshot, forecasts: Any) -> StockRiskAssessment:
+    def _assess_snapshot(  # OC-8: Avaliacao de snapshot com classificacao de risco
+        self, snap: StockSnapshot, forecasts: Any
+    ) -> StockRiskAssessment:
         sku = snap.sku()
         forecast = forecasts.for_sku(sku)
         risk = self._classifier.classify(

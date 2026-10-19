@@ -131,4 +131,4 @@ Se o prazo apertar, a ordem de corte é: **Fases 0→4** entregam o valor acadê
 
 ## Evoluções fora do escopo atual
 
-Registradas aqui para não vazarem para a implementação: preço de venda separado do custo de compra (D-10), fitness com margem (D-01), lead time de fornecedor, validade/shelf-life, desconto por volume, restrição de espaço de armazenagem, Prophet ou modelos de ensemble (D-11), validação cruzada, dados reais de ERP (D-07), autenticação e multiusuário.
+Registradas aqui para não vazarem para a implementação: preço de venda separado do custo de compra (D-10), fitness com margem (D-01), lead time de fornecedor, validade/shelf-life, desconto por volume, restrição de espaço de armazenagem, Prophet ou modelos de ensemble (D-11), validação cruzada, autenticação e multiusuário. *(Ingestão de datasets pelo usuário saiu desta lista — implementada, ver D-18.)*

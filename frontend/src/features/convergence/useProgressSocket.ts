@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { ConvergencePoint, ProgressMessage } from '../../shared/api/contracts';
 import {
   defaultProgressChannel,
@@ -23,9 +23,6 @@ export function useProgressSocket(
   const [status, setStatus] = useState<'idle' | 'evolving' | 'completed' | 'failed'>('idle');
   const [currentGeneration, setCurrentGeneration] = useState<number>(0);
 
-  // Keep track of observed generations to prevent duplicate points
-  const observedGenerations = useRef<Set<number>>(new Set());
-
   useEffect(() => {
     if (!taskId) {
       setPoints([]);
@@ -33,14 +30,12 @@ export function useProgressSocket(
       setIsSocketFailed(false);
       setStatus('idle');
       setCurrentGeneration(0);
-      observedGenerations.current.clear();
       return;
     }
 
     setIsConnected(true);
     setIsSocketFailed(false);
     setStatus('evolving');
-    observedGenerations.current.clear();
     setPoints([]);
 
     const unsubscribe = channel.subscribe(
@@ -53,21 +48,24 @@ export function useProgressSocket(
           setCurrentGeneration(msg.generation);
         }
 
-        // D-09 / FIX 3: Ignore sentinel or non-positive fitness values from polluting chart points
+        // D-09: descarta frames sentinela para nao distorcer a escala do grafico.
         if (msg.generation >= 0 && msg.max_fitness > 0) {
+          const point: ConvergencePoint = {
+            generation: msg.generation,
+            max_fitness: msg.max_fitness,
+          };
+          // O updater precisa ser PURO: o React 18 em StrictMode o invoca duas vezes,
+          // e qualquer efeito colateral aqui (ex.: marcar a geracao num Set externo)
+          // faz a segunda invocacao descartar o ponto. A deduplicacao olha o proprio
+          // array acumulado, que e a unica fonte de verdade.
           setPoints((prev) => {
-            if (observedGenerations.current.has(msg.generation)) {
-              return prev.map((p) =>
-                p.generation === msg.generation
-                  ? { generation: msg.generation, max_fitness: msg.max_fitness }
-                  : p
-              );
+            const index = prev.findIndex((p) => p.generation === point.generation);
+            if (index < 0) {
+              return [...prev, point];
             }
-            observedGenerations.current.add(msg.generation);
-            return [
-              ...prev,
-              { generation: msg.generation, max_fitness: msg.max_fitness },
-            ];
+            const next = [...prev];
+            next[index] = point;
+            return next;
           });
         }
       },

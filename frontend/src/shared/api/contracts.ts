@@ -85,3 +85,16 @@ export interface ProgressMessage {
   max_fitness: number;
   status: 'evolving' | 'completed' | 'failed';
 }
+
+export interface DatasetSummary {
+  reference: string;
+  rows: number;
+  skus: number;
+  uploaded_at: string;
+  is_builtin: boolean;
+}
+
+export interface DatasetListResponse {
+  datasets: DatasetSummary[];
+  required_columns: string[];
+}

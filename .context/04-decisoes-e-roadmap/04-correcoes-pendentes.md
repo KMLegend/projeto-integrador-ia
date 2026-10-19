@@ -380,18 +380,20 @@ O resumo entregue no chat afirmou "**5 produtos** em risco" na baseline e identi
 | 16 | `06-baseline-e-indicadores.md` seção 3.2 corrigida com `history[0] = 803,22` e a ressalva do `RandomSource` | ✅ |
 | 17 | `test_immediate_status_and_websocket_after_accepted`, `test_unknown_dataset_returns_422_synchronously`, `test_nonexistent_task_returns_404_and_websocket_4404`; 6 e2e passam | ✅ |
 | 18 | Relatório cita `D-01` a `D-17`, todos existentes no ADR, zero IDs inventados, todos os links resolvem | ✅ |
+| 19 | `budget_limit` e `ga_parameters` honrados dinamicamente; `total_cost ≤ budget_limit`; 4 e2e parametrizados; suite com 119 testes unit/integ e 10 e2e | ✅ |
 
-**Portões:** `ruff format` · `ruff check` · `mypy --strict` (119 arquivos) · `lint-imports` 3/3 · `check_calisthenics.sh` · `pytest` 107 passed 1 skipped · cobertura domínio **95,79%** · global **89,50%** · frontend `tsc`/`eslint`/28 testes — **todos verdes**.
+**Portões:** `ruff format` · `ruff check` · `mypy --strict` (119 arquivos) · `lint-imports` 3/3 · `check_calisthenics.sh` · `pytest` 119 passed 1 skipped · cobertura domínio **95,26%** · global **89,71%** · frontend `tsc`/`eslint`/28 testes · 10 testes e2e — **todos verdes**.
 
 **Valores-ouro com o payload padrão:** R$ 987,44 · 98,7% · 120/146 · 82,2% · 1 em risco · 816,92 · baseline 314,32 / 36 / 24,7% / 2 / 236,58 · MAE 4,76 — **todos preservados**.
 
-Pendências menores remanescentes do FIX 14: `ClassifyStockRisk._assess_snapshot` ([classify_stock_risk.py:28](backend/src/application/use_cases/classify_stock_risk.py:28)) e `CompareReplenishmentStrategies._assess_plan` ([compare_replenishment_strategies.py:78](backend/src/application/use_cases/compare_replenishment_strategies.py:78)) têm 6 linhas sem comentário `# OC-8`. Os outros 16 métodos acima do limite em `application/` estão justificados.
+Pendências do FIX 14 resolvidas: `ClassifyStockRisk._assess_snapshot` ([classify_stock_risk.py:28](backend/src/application/use_cases/classify_stock_risk.py:28)) e `CompareReplenishmentStrategies._assess_plan` ([compare_replenishment_strategies.py:78](backend/src/application/use_cases/compare_replenishment_strategies.py:78)) agora contêm as anotações `# OC-8`. Todos os 18 métodos acima do limite em `application/` estão justificados.
 
 ---
 
-### FIX 19 — CRÍTICO: `budget_limit` e `ga_parameters` da requisição são ignorados
+### FIX 19 — CRÍTICO: `budget_limit` e `ga_parameters` da requisição são ignorados [RESOLVIDO E VERIFICADO]
 
-- **Severidade:** 🔴 **Crítico — viola RN-05, a restrição central do sistema** · **Origem:** TASK 24, TASK 27 · **Não detectado nas auditorias anteriores** (ver nota ao final)
+- **Status:** ✅ **Resolvido e Verificado**
+- **Severidade:** 🔴 **Crítico — viola RN-05, a restrição central do sistema** · **Origem:** TASK 24, TASK 27
 - **Evidência (reproduzível):**
 
   ```bash
@@ -446,6 +448,20 @@ Pendências menores remanescentes do FIX 14: `ClassifyStockRisk._assess_snapshot
   7. Teste e2e parametrizado por orçamento, afirmando `total_cost ≤ budget_limit` em cada caso — é a asserção que faltava.
 
 > **Nota honesta sobre por que isso passou.** Nas duas auditorias anteriores eu sempre usei o payload dos valores-ouro (R$ 1.000,00 / 60 / 100 / semente 42) — exatamente a combinação em que os parâmetros da requisição **coincidem** com os defaults do ambiente. Validar só o caminho que reproduz o número esperado esconde justamente esta classe de defeito. A suíte e2e tem o mesmo ponto cego: nenhum dos 6 testes varia orçamento ou parâmetros do AG. O aceite 7 acima fecha essa lacuna.
+
+### FIX 20 — Curva de convergência vazia durante a execução (React StrictMode)
+- **Severidade:** Alto · **Status:** ✅ **RESOLVIDO** · **Arquivo:** [useProgressSocket.ts](frontend/src/features/convergence/useProgressSocket.ts)
+- **Sintoma:** durante toda a otimização o gráfico exibia "Aguardando primeira geração…" enquanto o banner já marcava "Geração 99 de 100". A curva só aparecia no final, vinda de `convergence_curve` do resultado — ou seja, o acompanhamento em tempo real nunca funcionou em desenvolvimento.
+- **Causa raiz:** `observedGenerations.current.add(...)` era um **efeito colateral dentro do updater do `setPoints`**. O React 18 em `StrictMode` invoca updaters duas vezes: na primeira o `add()` executava e o ponto era anexado; na segunda o `has()` já retornava `true` e o updater caía no ramo de atualização, mapeando sobre o `prev` **original** — que não continha o ponto. O resultado da segunda invocação é o que o React mantém, então **todo ponto novo era descartado**.
+- **Correção:** o updater passou a ser **puro** — a deduplicação consulta o próprio array acumulado via `findIndex`, e o `useRef` externo foi removido.
+- **Verificação:** dois testes novos renderizam o hook dentro de `<React.StrictMode>`; confirmei que eles **falham** com o código antigo e passam com o novo. No navegador, a curva agora desenha ao vivo (badge "Ao vivo", pontos acumulando, eixo Y ajustado aos dados).
+
+### FIX 21 — Tela congela em "processando" quando a aba perde o foco
+- **Severidade:** Médio · **Status:** ✅ **RESOLVIDO** · **Arquivo:** [useOptimizationStatus.ts](frontend/src/features/optimization/useOptimizationStatus.ts)
+- **Sintoma:** com a aba oculta, o polling de `/status` parava após a primeira chamada e a tela ficava presa em "Evoluindo População" mesmo com a tarefa concluída.
+- **Causa raiz:** o TanStack Query pausa `refetchInterval` enquanto o documento está oculto. Como o `QueryClient` define `refetchOnWindowFocus: false` globalmente, ao voltar para a aba também não havia recuperação.
+- **Correção:** `refetchIntervalInBackground: true` na query de status. O polling continua em segundo plano e segue encerrando sozinho quando o estado deixa de ser `PROCESSING`.
+- **Verificação:** com o painel do navegador oculto (`document.visibilityState === "hidden"`), a execução completou e os resultados renderizaram normalmente — cenário em que antes travava.
 
 ---
 

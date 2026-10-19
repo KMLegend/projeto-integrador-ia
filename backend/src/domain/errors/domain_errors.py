@@ -52,3 +52,7 @@ class ModelNotAvailableError(DomainError):
 
 class UnknownDatasetError(DomainError):
     """Lancado quando uma referencia de dataset nao e reconhecida (D-07)."""
+
+
+class InvalidDatasetError(DomainError):
+    """Arquivo de dataset invalido: schema, formato ou conteudo fora do padrao."""

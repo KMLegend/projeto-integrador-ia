@@ -75,7 +75,7 @@ class CompareReplenishmentStrategies:
         optimized_assessment = self._assess_plan(optimized, scenario)
         return StrategyComparison(baseline_assessment, optimized_assessment)
 
-    def _assess_plan(
+    def _assess_plan(  # OC-8: Avaliacao de plano de compra sob politicas comparativas
         self,
         plan: PurchasePlan,
         scenario: ReplenishmentScenario,

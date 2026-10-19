@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.errors.exception_handlers import register_exception_handlers
+from api.routes.dataset_routes import router as dataset_router
 from api.routes.health_routes import router as health_router
 from api.routes.optimization_routes import router as optimization_router
 from api.routes.status_routes import router as status_router
@@ -28,6 +29,7 @@ def create_application() -> FastAPI:
     register_exception_handlers(app)
 
     app.include_router(health_router)
+    app.include_router(dataset_router)
     app.include_router(optimization_router)
     app.include_router(status_router)
     app.include_router(websocket_router)

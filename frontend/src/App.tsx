@@ -6,6 +6,8 @@ import { useOptimizationStatus } from './features/optimization/useOptimizationSt
 import { ProgressBanner } from './features/convergence/ProgressBanner';
 import { ConvergenceChart } from './features/convergence/ConvergenceChart';
 import { useProgressSocket } from './features/convergence/useProgressSocket';
+import { DatasetPicker } from './features/datasets/DatasetPicker';
+import { useDatasets } from './features/datasets/useDatasets';
 import { KpiCards } from './features/results/KpiCards';
 import { PurchasePlanTable } from './features/results/PurchasePlanTable';
 import { StrategyComparisonTable } from './features/results/StrategyComparisonTable';
@@ -26,6 +28,22 @@ interface AppProps {
 export const App: React.FC<AppProps> = ({ initialTaskId = null }) => {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(initialTaskId);
   const [submittedRequest, setSubmittedRequest] = useState<OptimizationRequest | null>(null);
+
+  const [datasetReference, setDatasetReference] = useState<string>('historico_mensal_v1');
+  const {
+    datasets,
+    requiredColumns,
+    isUploading: isUploadingDataset,
+    error: datasetError,
+    upload: uploadDataset,
+  } = useDatasets();
+
+  const handleDatasetUpload = async (file: File) => {
+    const summary = await uploadDataset(file);
+    if (summary) {
+      setDatasetReference(summary.reference);
+    }
+  };
 
   const startMutation = useStartOptimization();
   const statusQuery = useOptimizationStatus(activeTaskId);
@@ -128,6 +146,18 @@ export const App: React.FC<AppProps> = ({ initialTaskId = null }) => {
           <OptimizationForm
             onSubmit={handleStart}
             isSubmitting={startMutation.isPending || (isProcessing && socketPoints.length === 0)}
+            datasetReference={datasetReference}
+            datasetSlot={
+              <DatasetPicker
+                datasets={datasets}
+                requiredColumns={requiredColumns}
+                selected={datasetReference}
+                isUploading={isUploadingDataset}
+                error={datasetError}
+                onSelect={setDatasetReference}
+                onUpload={(file) => void handleDatasetUpload(file)}
+              />
+            }
           />
         </section>
 

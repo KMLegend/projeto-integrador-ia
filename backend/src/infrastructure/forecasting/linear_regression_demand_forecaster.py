@@ -12,8 +12,12 @@ from domain.ports.demand_forecaster import DemandForecaster
 class LinearRegressionDemandForecaster(DemandForecaster):
     """Forecaster de demanda baseado em Regressão Linear com Scikit-Learn."""
 
-    def __init__(self, model: LinearRegression) -> None:
+    def __init__(self, model: LinearRegression, training_mae: float = 0.0) -> None:
         self._model = model
+        self._training_mae = training_mae
+
+    def training_mae(self) -> float:
+        return self._training_mae
 
     @staticmethod
     def train(
@@ -37,7 +41,7 @@ class LinearRegressionDemandForecaster(DemandForecaster):
         predictions = model.predict(x_test)
         mae = float(mean_absolute_error(y_test, predictions))
 
-        return LinearRegressionDemandForecaster(model), mae
+        return LinearRegressionDemandForecaster(model, mae), mae
 
     def forecast(self, snapshots: StockSnapshots) -> WeeklyDemandForecasts:
         latest = snapshots.latest_per_product()

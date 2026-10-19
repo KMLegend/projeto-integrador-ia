@@ -1,4 +1,4 @@
-# Relatório de Conformidade Arquitetural e Fechamento (TASK 41)
+C:\caddyserver\caddy_windows_amd64.exe reload --config C:\caddyserver\Caddyfile# Relatório de Conformidade Arquitetural e Fechamento (TASK 41)
 
 **Data de Validação:** 14 de Outubro de 2026  
 **Status dos Portões de Qualidade:** 100% Aprovado (Verde)  

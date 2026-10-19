@@ -30,7 +30,7 @@ describe('OptimizationForm', () => {
 
   it('renderiza inputs com valores padrao e permite submissao', () => {
     const handleSubmit = vi.fn();
-    render(<OptimizationForm onSubmit={handleSubmit} isSubmitting={false} />);
+    render(<OptimizationForm onSubmit={handleSubmit} isSubmitting={false} datasetReference="historico_mensal_v1" />);
 
     const budgetInput = screen.getByLabelText(/Orçamento Limite/i);
     expect(budgetInput).toHaveValue(1000);
@@ -52,7 +52,7 @@ describe('OptimizationForm', () => {
   });
 
   it('desabilita botao e exibe spinner durante envio', () => {
-    render(<OptimizationForm onSubmit={vi.fn()} isSubmitting={true} />);
+    render(<OptimizationForm onSubmit={vi.fn()} isSubmitting={true} datasetReference="historico_mensal_v1" />);
     const submitButton = screen.getByRole('button', { name: /Iniciando otimização.../i });
     expect(submitButton).toBeDisabled();
   });

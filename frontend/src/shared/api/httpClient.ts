@@ -2,7 +2,14 @@ import {
   OptimizationRequest,
   OptimizationStatusResponse,
   StartOptimizationResponse,
+  DatasetListResponse,
+  DatasetSummary,
 } from './contracts';
+
+export interface DatasetApi {
+  list(): Promise<DatasetListResponse>;
+  upload(file: File, reference?: string): Promise<DatasetSummary>;
+}
 
 export interface OptimizationApi {
   start(request: OptimizationRequest): Promise<StartOptimizationResponse>;
@@ -58,6 +65,47 @@ export class FetchOptimizationApi implements OptimizationApi {
   }
 }
 
+export class FetchDatasetApi implements DatasetApi {
+  private readonly baseUrl: string;
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl.replace(/\/+$/, '');
+  }
+
+  async list(): Promise<DatasetListResponse> {
+    const response = await fetch(`${this.baseUrl}/api/v1/datasets`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) {
+      throw new Error(`Erro ao listar datasets (HTTP ${response.status})`);
+    }
+    return (await response.json()) as DatasetListResponse;
+  }
+
+  async upload(file: File, reference?: string): Promise<DatasetSummary> {
+    const form = new FormData();
+    form.append('file', file);
+    if (reference) {
+      form.append('reference', reference);
+    }
+    const response = await fetch(`${this.baseUrl}/api/v1/datasets`, {
+      method: 'POST',
+      body: form,
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      throw new Error(
+        body?.error?.message ?? `Falha ao enviar dataset (HTTP ${response.status})`
+      );
+    }
+    return body as DatasetSummary;
+  }
+}
+
+export function createDatasetApi(baseUrl: string): DatasetApi {
+  return new FetchDatasetApi(baseUrl);
+}
+
 export function createOptimizationApi(baseUrl: string): OptimizationApi {
   return new FetchOptimizationApi(baseUrl);
 }
@@ -68,3 +116,4 @@ const defaultApiBaseUrl =
     : 'http://localhost:8000';
 
 export const defaultOptimizationApi = createOptimizationApi(defaultApiBaseUrl);
+export const defaultDatasetApi = createDatasetApi(defaultApiBaseUrl);

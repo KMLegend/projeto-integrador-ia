@@ -12,11 +12,15 @@ import { Sparkles, Loader2, Sliders, DollarSign } from 'lucide-react';
 interface OptimizationFormProps {
   onSubmit: (request: OptimizationRequest) => void;
   isSubmitting: boolean;
+  datasetReference: string;
+  datasetSlot?: React.ReactNode;
 }
 
 export const OptimizationForm: React.FC<OptimizationFormProps> = ({
   onSubmit,
   isSubmitting,
+  datasetReference,
+  datasetSlot,
 }) => {
   const [formData, setFormData] = useState<OptimizationFormData>(defaultOptimizationFormData);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -44,7 +48,7 @@ export const OptimizationForm: React.FC<OptimizationFormProps> = ({
       setErrors(validationErrors);
       return;
     }
-    onSubmit(toOptimizationRequest(formData));
+    onSubmit({ ...toOptimizationRequest(formData), dataset_reference: datasetReference });
   };
 
   return (
@@ -64,6 +68,8 @@ export const OptimizationForm: React.FC<OptimizationFormProps> = ({
           </p>
         </div>
       </div>
+
+      {datasetSlot && <div className="mb-6">{datasetSlot}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
         {/* Orçamento Limite */}

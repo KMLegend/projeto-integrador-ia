@@ -42,11 +42,15 @@ def run_optimization(self: Any, payload: dict[str, Any]) -> dict[str, Any]:
     publisher = build_progress_publisher(settings, task_id)
     store = build_task_result_store(settings)
     store.save(TaskId.of(task_id), OptimizationOutcome.processing(task_id))
-
     try:
-        request = OptimizationRequest.from_payload(payload)
+        request = OptimizationRequest.from_payload(
+            payload,
+            default_budget=float(settings.default_budget_limit),
+            default_cycle=settings.default_cycle_weeks,
+            default_seed=settings.default_random_seed,
+        )
         observer = build_evolution_observer(settings, task_id, request.generations)
-        use_case = build_optimization_use_case(settings, request.dataset_reference)
+        use_case = build_optimization_use_case(settings, request.dataset_reference, request=request)
         outcome = use_case.execute(request, observer)
         final_fitness = 0.0
         if outcome.best_scenario_summary is not None:
