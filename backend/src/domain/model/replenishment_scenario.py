@@ -6,6 +6,7 @@ from domain.model.position import MaybePosition, Position
 from domain.model.purchase_plan import PurchasePlan
 from domain.model.quantity import Quantity
 from domain.model.replenishment_item import ReplenishmentItem
+from domain.model.unit_price import UnitPrice
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +46,13 @@ class ReplenishmentScenario:
         if not positions:
             return MaybePosition.absent()
         return max(positions, key=self._position_sort_key).as_maybe()
+
+    def unit_price_at(self, position: Position) -> UnitPrice:
+        return self._items[position.index_value()].unit_price()
+
+    def price_rank_of(self, position: Position) -> tuple[int, int]:
+        """Mesma ordem de desempate de `most_expensive_position_among` (D-19)."""
+        return self._position_sort_key(position)
 
     def _position_sort_key(self, p: Position) -> tuple[int, int]:
         price_cents = self._items[p.index_value()].unit_price().cents_for_computation()

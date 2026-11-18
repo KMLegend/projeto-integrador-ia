@@ -26,7 +26,7 @@ from domain.evolution.evolution_engine import EvolutionEngine
 from domain.evolution.evolution_operators import EvolutionOperators
 from domain.evolution.evolution_settings import EvolutionSettings
 from domain.model.budget_constraint import BudgetConstraint
-from domain.policy.budget_aware_plan_repair import BudgetAwarePlanRepair
+from domain.policy.batched_budget_plan_repair import BatchedBudgetPlanRepair
 from domain.policy.coverage_calculator import CoverageCalculator
 from domain.policy.naive_replenishment_policy import NaiveReplenishmentPolicy
 from domain.policy.stock_risk_classifier import StockRiskClassifier
@@ -156,7 +156,8 @@ def build_optimization_use_case(
     random_source = SeededRandomSource(engine_settings.random_seed)
     coverage_calc = CoverageCalculator()
     fitness_policy = WeightedFitnessPolicy.standard()
-    repair = BudgetAwarePlanRepair(budget)
+    # D-19: reparo em lote — mesmo resultado, custo independente do numero de SKUs
+    repair = BatchedBudgetPlanRepair(budget)
 
     operators = EvolutionOperators.standard(
         random_source,

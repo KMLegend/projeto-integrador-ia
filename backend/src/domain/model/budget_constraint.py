@@ -36,6 +36,9 @@ class BudgetConstraint:
             return Money.zero()
         return Money(self._limit.cents_for_computation() // count)
 
+    def limit_cents_for_computation(self) -> int:
+        return self._limit.cents_for_computation()
+
     def limit_money(self) -> Money:
         return self._limit
 

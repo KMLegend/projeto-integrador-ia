@@ -55,3 +55,6 @@ frontend/node_modules/
 .idea/
 *.swp
 *.swo
+
+# macOS
+.DS_Store

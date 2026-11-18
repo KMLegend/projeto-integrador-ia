@@ -184,6 +184,51 @@ Componentes: porta `DatasetCatalog` (`application/ports/`, consumidor-dono, coer
 
 > Esta decisão **revoga** a linha "dados reais de ERP (D-07)" da seção *Evoluções fora do escopo atual* do roadmap.
 
+## D-19 — Reparo em lote como padrão (desempenho independente do nº de SKUs)
+
+**Contexto.** O `BudgetAwarePlanRepair` remove **uma unidade por vez** e recalcula o custo
+total do plano a cada iteração — `O(unidades removidas × itens)`. A seção 3 de
+`01-dominio-e-negocio/04-funcao-fitness.md` já previa que isso não escalaria. Com uma base
+real de **1.333 SKUs**, o worker estourou o `task_soft_time_limit` de 270 s e a otimização
+falhou com `SoftTimeLimitExceeded` dentro do laço de reparo.
+
+**Decisão.** `BatchedBudgetPlanRepair` passa a ser o reparo padrão no container. Ele mantém o
+custo de forma incremental e remove de uma só vez todas as unidades necessárias do item mais
+caro, na mesma ordem de desempate do reparo ingênuo.
+
+**Por que é equivalente.** Remover unidades de um item não altera preço nenhum, então o item
+mais caro continua sendo o mais caro até zerar. Remover N unidades dele de uma vez produz o
+mesmo plano que remover N vezes uma unidade.
+
+**Consequências.**
+1. 1.333 SKUs: de **falha em 272 s** para **conclusão em 40 s**.
+2. Valores-ouro preservados: R$ 987,44 · 82,2% · 1 em risco · fitness 816,92.
+3. `BudgetAwarePlanRepair` continua no código como referência de equivalência, exercitado por
+   `tests/properties/test_batched_repair_equivalence.py` (300 casos por `hypothesis` + planos
+   de valor-ouro + 5 faixas de orçamento).
+4. Novos acessores: `BudgetConstraint.limit_cents_for_computation()`,
+   `ReplenishmentScenario.unit_price_cents_at()` e `price_rank_of()`.
+
+## D-20 — Os pesos do fitness são calibrados para catálogos pequenos
+
+**Contexto.** A função é `cobertura(%) × 10 − produtos_em_risco × 5`. O prêmio é limitado a
+**+1.000** (cobertura máxima de 100%), mas a penalidade cresce com o catálogo: com 1.333 SKUs
+o piso é **−6.665**. Medido na base real, mesmo com orçamento de R$ 900.000 e 67,6% de
+cobertura, o fitness fica em **−2.113**, porque 558 produtos seguem com necessidade.
+
+**Decisão.** Manter os pesos 10/5 como padrão — eles são os valores apresentados à banca e
+definem os valores-ouro. Registrar a limitação: **a escala do fitness só é interpretável
+quando o número de produtos com necessidade é da ordem de dezenas.**
+
+**Consequências.**
+1. Para demonstração, usar a base de 60 SKUs, onde o fitness lê de forma intuitiva.
+2. A base de 1.333 SKUs serve para demonstrar **escala e tempo de execução**, não para
+   comparar fitness em valor absoluto. A comparação baseline × AG continua válida ali
+   (−3.219 contra −3.021), porque ambos sofrem a mesma penalidade.
+3. Normalizar a penalidade (por exemplo, usar o *percentual* de produtos em risco em vez da
+   contagem) resolveria — mas mudaria os valores-ouro, então fica como evolução prevista e
+   **não** foi aplicado.
+
 ---
 
 ## Como registrar uma divergência nova

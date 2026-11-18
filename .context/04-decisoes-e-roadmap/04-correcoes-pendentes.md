@@ -65,6 +65,9 @@ FIX 13 → FIX 16            (padroes e documentacao)
 
 ## REVALIDAÇÃO (pós-implementação completa)
 
+> **Esta seção é histórica.** Reflete a 1ª revalidação. O estado atual, verificado contra o
+> código, está em *Revalidação 3* ao final do documento: **os 21 FIXes estão resolvidos**.
+
 A primeira auditoria pegou a implementação **em andamento**. Esta revalidação foi feita com a implementação declarada concluída. Resultado: **9 de 16 FIXes resolvidos**, 7 em aberto, **2 novos** encontrados (FIX 17 e FIX 18, ao final deste documento).
 
 | FIX | Assunto | Status |
@@ -462,6 +465,78 @@ Pendências do FIX 14 resolvidas: `ClassifyStockRisk._assess_snapshot` ([classif
 - **Causa raiz:** o TanStack Query pausa `refetchInterval` enquanto o documento está oculto. Como o `QueryClient` define `refetchOnWindowFocus: false` globalmente, ao voltar para a aba também não havia recuperação.
 - **Correção:** `refetchIntervalInBackground: true` na query de status. O polling continua em segundo plano e segue encerrando sozinho quando o estado deixa de ser `PROCESSING`.
 - **Verificação:** com o painel do navegador oculto (`document.visibilityState === "hidden"`), a execução completou e os resultados renderizaram normalmente — cenário em que antes travava.
+
+---
+
+---
+
+## REVALIDAÇÃO 3 — verificação contra o código (18/11/2026)
+
+Conferência item a item no repositório, não por relato. **Os 21 FIXes estão resolvidos.**
+As marcações 🔴 das seções anteriores são históricas.
+
+| FIX | Verificação feita no código | Estado |
+|---|---|---|
+| 1 | `optimization_routes.py` grava `processing` antes do `send_task` | ✅ |
+| 2 | `--timeout-graceful-shutdown` no override · `CancelledError` tratado no WebSocket | ✅ |
+| 3 | `optimization_task.py` publica `generation=last_gen` e `max_fitness=final_fitness` reais | ✅ |
+| 4–8 | Portões de lint, formatação, tipagem, e2e e cobertura configurados | ✅ |
+| 9–12 | README, CI, versões fixadas e relatório de conformidade presentes | ✅ |
+| 13 | `tests/properties/` com **6** propriedades usando `@given` | ✅ |
+| 14 | **0** métodos acima de 5 linhas em `domain/` (19 em `application/`, justificados) | ✅ |
+| 15 | `D-14` a `D-18` no ADR · `_ensure_known_dataset` valida na borda | ✅ |
+| 16 | `06-baseline-e-indicadores.md` traz 803,22 com a ressalva do gerador | ✅ |
+| 17 | e2e com asserção imediata de contrato | ✅ |
+| 18 | Relatório alinhado a `D-01`–`D-18` | ✅ |
+| 19 | `container.py` usa `to_budget_constraint()` e `to_evolution_settings()` | ✅ |
+| 20 | `useProgressSocket.ts` com atualizador puro (`findIndex`) | ✅ |
+| 21 | `useOptimizationStatus.ts` com `refetchIntervalInBackground` | ✅ |
+
+**Nota sobre o FIX 3:** uma verificação anterior o reportou como ausente por buscar um
+literal (`generation=request.generations`) que foi substituído por `generation=last_gen`.
+O comportamento está correto — o frame terminal carrega geração e fitness reais.
+
+### FIX 22 — Reparo não escalava: 1.333 SKUs estouravam o tempo do worker
+- **Severidade:** Alto · **Status:** ✅ **RESOLVIDO** · **Decisão:** D-19
+- **Evidência:** com a base real de 266.600 registros e 1.333 SKUs, a otimização falhou com
+  `INTERNAL_ERROR` após **272 s**. Log do worker: `SoftTimeLimitExceeded` levantado dentro de
+  `BudgetAwarePlanRepair._fit_to_budget`.
+- **Causa raiz:** o reparo remove **uma unidade por vez** e recalcula `total_cost_of(plan)`
+  sobre todos os itens a cada iteração — `O(unidades removidas × itens)`. A seção 3 de
+  `01-dominio-e-negocio/04-funcao-fitness.md` **já previa** essa limitação e indicava a
+  remoção em lote como troca legítima sob OCP; nunca foi implementada.
+- **Correção:** `BatchedBudgetPlanRepair` — custo mantido de forma incremental, unidades do
+  item mais caro removidas de uma vez, mesma ordem de desempate. Passou a ser o padrão no
+  container.
+- **Verificação:** 1.333 SKUs de **falha em 272 s** para **conclusão em 40 s**. Valores-ouro
+  preservados (R$ 987,44 · 816,92). Equivalência coberta por
+  `tests/properties/test_batched_repair_equivalence.py` — 300 casos via `hypothesis`, planos
+  de valor-ouro e 5 faixas de orçamento.
+
+### FIX 23 — Escala do fitness não é interpretável em catálogos grandes
+- **Severidade:** Médio · **Status:** 📋 **DOCUMENTADO, não corrigido** · **Decisão:** D-20
+- **Evidência:** com 1.333 SKUs o fitness fica negativo mesmo com orçamento alto — R$ 900.000
+  e 67,6% de cobertura produzem **−2.113**, porque 558 produtos seguem com necessidade.
+- **Causa raiz:** o prêmio é limitado a **+1.000** (cobertura máxima), mas a penalidade é
+  `produtos_em_risco × 5`, que cresce com o catálogo: piso de **−6.665** para 1.333 SKUs.
+  Os pesos 10/5 foram calibrados para 6 produtos.
+- **Por que não foi corrigido:** normalizar a penalidade mudaria os valores-ouro apresentados
+  à banca. Fica registrado como limitação conhecida e evolução prevista.
+- **Efeito prático:** demonstrar com a base de 60 SKUs, onde o fitness lê de forma intuitiva.
+  A base de 1.333 SKUs demonstra **escala e tempo**, não valor absoluto de fitness — a
+  comparação baseline × AG continua válida ali (−3.219 contra −3.021).
+
+### FIX 24 — `staleTime` como função era silenciosamente inválido
+- **Severidade:** Médio · **Status:** ✅ **RESOLVIDO** · **Arquivo:** [useOptimizationStatus.ts](frontend/src/features/optimization/useOptimizationStatus.ts)
+- **Evidência:** `npx tsc --noEmit` → `error TS7006: Parameter 'query' implicitly has an 'any' type`.
+- **Causa raiz:** o código passava `staleTime` como **função**, mas na versão instalada do
+  TanStack Query (**5.28.9**) o tipo é `staleTime?: number` — a forma de função só chegou na
+  5.42. O valor passado era um objeto de função onde se esperava um número, o que nunca
+  produziu o comportamento pretendido.
+- **Correção:** `staleTime: Infinity`. Quem dispara as reconsultas enquanto a tarefa processa
+  é o `refetchInterval`, que não depende de *staleness*; depois de `COMPLETED` o resultado é
+  imutável e não deve recarregar. O comportamento pretendido passa a ser o real.
+- **Verificação:** `tsc --noEmit` limpo, `eslint` limpo, 30 testes de frontend passando.
 
 ---
 

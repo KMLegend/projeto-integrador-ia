@@ -72,6 +72,13 @@ class Money:
 
         return Quantity(self._cents // price.cents_for_computation())
 
+    def units_needed_at(self, price: "UnitPrice") -> "Quantity":
+        """Unidades deste preco necessarias para cobrir este valor (arredonda para cima)."""
+        from domain.model.quantity import Quantity
+
+        price_cents = price.cents_for_computation()
+        return Quantity(-(-self._cents // price_cents))
+
     def cents_for_computation(self) -> int:
         return self._cents
 

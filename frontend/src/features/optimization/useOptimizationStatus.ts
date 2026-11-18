@@ -29,13 +29,11 @@ export function useOptimizationStatus(
     // QueryClient desliga refetchOnWindowFocus, a tela nunca se recuperaria ao
     // voltar e ficaria presa em "processando" com a tarefa ja concluida.
     refetchIntervalInBackground: true,
-    staleTime: (query) => {
-      const status = query.state.data?.status;
-      if (status === 'COMPLETED' || status === 'FAILED') {
-        return Infinity;
-      }
-      return 0;
-    },
+    // staleTime so aceita numero nesta versao do TanStack (5.28.9); a forma de funcao
+    // chegou na 5.42 e aqui era silenciosamente invalida. Infinity e o valor correto:
+    // quem dispara as reconsultas enquanto processa e o refetchInterval acima, que nao
+    // depende de staleness. Apos COMPLETED o resultado e imutavel e nao deve recarregar.
+    staleTime: Infinity,
     retry: 2,
   });
 }
