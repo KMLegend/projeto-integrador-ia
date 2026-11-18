@@ -1,0 +1,542 @@
+<title>Deck de Apoio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&display=swap">
+
+<style>
+/* Deck de projeção: compromisso deliberado com um único visual escuro,
+   pensado para sala com luz baixa. Todas as cores são pintadas explicitamente. */
+:root{
+  --ground:#0E1513;
+  --surface:#18231F;
+  --surface-2:#1F2D28;
+  --ink:#EAF0ED;
+  --ink-soft:#A9BAB4;
+  --muted:#7A8C87;
+  --rule:#2B3B36;
+  --accent:#5CBCA4;
+  --accent-deep:#2E8C77;
+  --accent-ink:#8FD8C6;
+  --signal:#DB9059;
+  --signal-ink:#F0B98A;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  line-height:1.5; -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+
+.deck{height:100vh; width:100%; position:relative}
+.slide{
+  position:absolute; inset:0; display:none;
+  flex-direction:column; justify-content:center;
+  padding:clamp(2rem,5vw,5rem) clamp(2rem,7vw,7rem);
+  animation:in .34s ease both;
+}
+.slide.on{display:flex}
+@keyframes in{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){ .slide{animation:none} }
+
+/* ---------- tipografia ---------- */
+.kicker{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:clamp(.62rem,1.1vw,.8rem); font-weight:500;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--accent);
+  margin-bottom:clamp(.8rem,1.8vw,1.4rem);
+}
+h1{
+  font-family:Newsreader,Georgia,serif; font-weight:400;
+  font-size:clamp(2.4rem,6.4vw,5.2rem); line-height:1.03;
+  letter-spacing:-.02em; text-wrap:balance; color:var(--ink);
+}
+h2{
+  font-family:Newsreader,Georgia,serif; font-weight:400;
+  font-size:clamp(1.9rem,4.4vw,3.4rem); line-height:1.1;
+  letter-spacing:-.015em; text-wrap:balance; margin-bottom:clamp(1rem,2.2vw,1.8rem);
+}
+h2 em{font-style:normal; color:var(--accent-ink)}
+p{font-size:clamp(1rem,1.9vw,1.45rem); color:var(--ink-soft); max-width:40ch}
+p.wide{max-width:52ch}
+strong{color:var(--ink); font-weight:600}
+
+/* ---------- capa ---------- */
+.cover{justify-content:center}
+.cover h1{margin-bottom:clamp(1rem,2vw,1.6rem)}
+.cover .sub{
+  font-size:clamp(1rem,2.1vw,1.6rem); color:var(--accent-ink);
+  font-family:Newsreader,Georgia,serif; font-weight:300; font-style:italic;
+  margin-bottom:clamp(2rem,5vw,3.4rem);
+}
+.cover .who{
+  display:flex; flex-wrap:wrap; gap:.4rem 2rem; padding-top:clamp(1rem,2.4vw,1.8rem);
+  border-top:1px solid var(--rule); font-size:clamp(.82rem,1.5vw,1.05rem); color:var(--muted);
+}
+.cover .who b{color:var(--ink-soft); font-weight:500}
+
+/* ---------- listas ---------- */
+ul.pts{list-style:none; display:flex; flex-direction:column; gap:clamp(.7rem,1.6vw,1.3rem); max-width:50ch}
+ul.pts li{
+  font-size:clamp(1rem,2vw,1.5rem); color:var(--ink-soft);
+  padding-left:1.5rem; position:relative; line-height:1.4;
+}
+ul.pts li::before{
+  content:""; position:absolute; left:0; top:.62em;
+  width:.5rem; height:1px; background:var(--accent);
+}
+
+/* ---------- dois custos ---------- */
+.duo{display:grid; grid-template-columns:1fr 1fr; gap:clamp(1rem,3vw,2.5rem); margin-top:1rem}
+.duo .card{
+  background:var(--surface); border:1px solid var(--rule); border-radius:4px;
+  padding:clamp(1.1rem,2.4vw,2rem);
+}
+.duo .card h3{
+  font-family:"IBM Plex Mono",monospace; font-size:clamp(.66rem,1.1vw,.78rem);
+  letter-spacing:.14em; text-transform:uppercase; font-weight:600; margin-bottom:.7rem;
+}
+.duo .card:first-child h3{color:var(--signal-ink)}
+.duo .card:last-child h3{color:var(--accent-ink)}
+.duo .card p{font-size:clamp(.9rem,1.7vw,1.2rem); max-width:none}
+
+/* ---------- métricas ---------- */
+.metrics{display:flex; flex-wrap:wrap; gap:clamp(1.4rem,4vw,4rem); margin-top:clamp(1rem,2.4vw,2rem)}
+.metric{display:flex; flex-direction:column; gap:.3rem}
+.metric .v{
+  font-family:"IBM Plex Mono",monospace; font-weight:600;
+  font-size:clamp(2rem,5.4vw,4.2rem); line-height:1;
+  letter-spacing:-.03em; color:var(--accent); font-variant-numeric:tabular-nums;
+}
+.metric .v.warn{color:var(--signal)}
+.metric .l{
+  font-family:"IBM Plex Mono",monospace; font-size:clamp(.62rem,1.1vw,.76rem);
+  letter-spacing:.13em; text-transform:uppercase; color:var(--muted);
+}
+.metric .s{font-size:clamp(.78rem,1.4vw,.95rem); color:var(--ink-soft)}
+
+/* ---------- fórmula ---------- */
+.formula{
+  background:var(--surface); border:1px solid var(--rule);
+  border-left:3px solid var(--accent); border-radius:4px;
+  padding:clamp(1.2rem,3vw,2.2rem); margin:clamp(1rem,2.4vw,1.8rem) 0;
+  font-family:"IBM Plex Mono",monospace;
+  font-size:clamp(.95rem,2.4vw,1.9rem); line-height:1.7; color:var(--ink);
+  overflow-x:auto; letter-spacing:-.01em;
+}
+.formula .op{color:var(--accent)}
+.formula .note{
+  display:block; margin-top:.9rem; font-size:clamp(.7rem,1.3vw,.95rem);
+  color:var(--muted); letter-spacing:0;
+}
+
+/* ---------- tabelas ---------- */
+.tbl{overflow-x:auto; margin-top:clamp(.8rem,2vw,1.4rem); border:1px solid var(--rule); border-radius:4px}
+table{border-collapse:collapse; width:100%; font-size:clamp(.78rem,1.5vw,1.08rem)}
+th,td{padding:clamp(.45rem,1.1vw,.85rem) clamp(.6rem,1.3vw,1.1rem); text-align:left; border-bottom:1px solid var(--rule)}
+thead th{
+  font-family:"IBM Plex Mono",monospace; font-size:clamp(.58rem,1vw,.72rem);
+  letter-spacing:.12em; text-transform:uppercase; color:var(--muted); font-weight:500;
+  background:var(--surface); white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+tbody td{color:var(--ink-soft)}
+td.n,th.n{text-align:right; font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+td.hi{color:var(--accent); font-weight:600}
+td.lo{color:var(--signal)}
+tbody tr.accent td{background:var(--surface-2); color:var(--ink)}
+
+/* ---------- fluxo ---------- */
+.flow{display:flex; flex-wrap:wrap; align-items:stretch; gap:clamp(.5rem,1.4vw,1rem); margin-top:clamp(1rem,2.4vw,2rem)}
+.flow .step{
+  flex:1 1 9rem; background:var(--surface); border:1px solid var(--rule);
+  border-radius:4px; padding:clamp(.8rem,1.8vw,1.3rem); display:flex; flex-direction:column; gap:.4rem;
+}
+.flow .step .t{
+  font-family:"IBM Plex Mono",monospace; font-size:clamp(.58rem,1vw,.7rem);
+  letter-spacing:.13em; text-transform:uppercase; color:var(--accent);
+}
+.flow .step .d{font-size:clamp(.8rem,1.5vw,1.05rem); color:var(--ink-soft); line-height:1.35}
+.flow .arrow{display:flex; align-items:center; color:var(--muted); font-size:1.3rem}
+
+/* ---------- destaque ---------- */
+.pull{
+  font-family:Newsreader,Georgia,serif; font-weight:300; font-style:italic;
+  font-size:clamp(1.3rem,3.4vw,2.6rem); line-height:1.3; color:var(--accent-ink);
+  max-width:28ch; text-wrap:balance;
+}
+.foot{
+  margin-top:clamp(1rem,2.6vw,2rem); font-size:clamp(.78rem,1.4vw,1rem);
+  color:var(--muted); max-width:56ch;
+}
+
+/* ---------- navegação ---------- */
+.hud{
+  position:fixed; bottom:0; left:0; right:0; height:3px;
+  background:var(--rule); z-index:20;
+}
+.hud .bar{height:100%; background:var(--accent); width:0; transition:width .3s ease}
+.counter{
+  position:fixed; bottom:1rem; right:1.4rem; z-index:21;
+  font-family:"IBM Plex Mono",monospace; font-size:.74rem;
+  letter-spacing:.1em; color:var(--muted); font-variant-numeric:tabular-nums;
+}
+.counter b{color:var(--accent); font-weight:500}
+.hint{
+  position:fixed; bottom:1rem; left:1.4rem; z-index:21;
+  font-family:"IBM Plex Mono",monospace; font-size:.68rem;
+  letter-spacing:.08em; color:var(--rule);
+}
+.nav{position:fixed; inset:0; display:flex; z-index:10}
+.nav button{
+  flex:1; background:none; border:none; cursor:pointer; opacity:0;
+}
+.nav button:focus-visible{opacity:1; outline:2px solid var(--accent); outline-offset:-4px}
+
+@media (max-width:720px){
+  .duo{grid-template-columns:1fr}
+  .flow .arrow{display:none}
+}
+@media print{
+  body{overflow:visible; background:#fff; color:#111}
+  .slide{display:flex !important; position:static; height:auto; min-height:48vh;
+    page-break-after:always; border-bottom:1px solid #ccc; animation:none}
+  .hud,.counter,.hint,.nav{display:none}
+}
+</style>
+
+<div class="deck" id="deck">
+
+  <!-- 01 -->
+  <section class="slide cover on">
+    <p class="kicker">ANEXO · material de apoio — a apresentação oficial tem 5 slides</p>
+    <h1>Gestão Preditiva de Estoque com Inteligência Artificial</h1>
+    <p class="sub">Regressão linear para prever · Algoritmo genético para decidir</p>
+    <div class="who">
+      <span><b>Carlos Eduardo</b></span><span><b>Adryan Kevin</b></span>
+      <span><b>Eduardo Mendonça</b></span><span><b>Gabriel</b></span>
+      <span><b>Kevin Maykel</b></span>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="slide">
+    <p class="kicker">O problema</p>
+    <h2>Quem compra estoque vive entre <em>dois custos</em></h2>
+    <div class="duo">
+      <div class="card">
+        <h3>Comprar de menos</h3>
+        <p>Ruptura na gôndola. Perde a venda e, muitas vezes, perde o cliente.</p>
+      </div>
+      <div class="card">
+        <h3>Comprar demais</h3>
+        <p>Capital de giro imobilizado, custo de armazenagem e risco de perda.</p>
+      </div>
+    </div>
+    <p class="foot">O que torna a decisão difícil não é conhecer esse equilíbrio — é que o dinheiro disponível quase nunca cobre tudo que precisa ser reposto.</p>
+  </section>
+
+  <!-- 03 -->
+  <section class="slide">
+    <p class="kicker">O fio condutor</p>
+    <h2>Dado → previsão → <em>decisão</em></h2>
+    <div class="flow">
+      <div class="step"><span class="t">Etapa 02</span><span class="d">Quais dados descrevem a situação de um produto</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="t">Etapa 03 · ML</span><span class="d">Quanto vai sair na próxima semana</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="t">Etapa 04 · AG</span><span class="d">O que comprar dentro do orçamento</span></div>
+    </div>
+    <p class="foot" style="margin-top:clamp(1.4rem,3vw,2.4rem)">Machine Learning é o <strong>sensor</strong>: diz o que vai acontecer.<br>Computação Evolutiva é o <strong>motor de decisão</strong>: diz o que fazer a respeito.</p>
+  </section>
+
+  <!-- 04 -->
+  <section class="slide">
+    <p class="kicker">Etapa 02 · O dado</p>
+    <h2>Cinco variáveis escolhidas pela <em>lógica de negócio</em></h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Variável</th><th>Por que importa no varejo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Estoque atual</strong></td><td>Disponibilidade na data de referência</td></tr>
+          <tr><td><strong>Saídas em 7 dias</strong></td><td>Ritmo imediato de consumo</td></tr>
+          <tr><td><strong>Saídas em 30 dias</strong></td><td>Tendência mensal, mais estável</td></tr>
+          <tr><td><strong>Preço</strong></td><td>Elasticidade da demanda ao valor</td></tr>
+          <tr><td><strong>Promoção</strong></td><td>Aceleração promocional das vendas</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">O modelo não descobre sozinho o que é relevante — ele aprende pesos sobre o que o grupo definiu como relevante.</p>
+  </section>
+
+  <!-- 05 -->
+  <section class="slide">
+    <p class="kicker">Etapa 03 · A previsão</p>
+    <h2>Regressão linear por <em>mínimos quadrados</em></h2>
+    <ul class="pts">
+      <li>O alvo é uma quantidade contínua → o problema é de <strong>regressão</strong>, não de classificação</li>
+      <li>Escolha de projeto, não limitação: cada coeficiente é <strong>auditável e explicável</strong></li>
+      <li>Divisão 80/20 com semente fixa — reproduzível ao vivo</li>
+    </ul>
+    <div class="metrics">
+      <div class="metric"><span class="v">4,76</span><span class="l">MAE · unidades/semana</span><span class="s">Erro médio na escala do negócio</span></div>
+      <div class="metric"><span class="v">96 / 24</span><span class="l">Treino / teste</span><span class="s">120 registros, semente 42</span></div>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="slide">
+    <p class="kicker">A ponte</p>
+    <h2>De “quanto vai vender” para <em>“quanto preciso comprar”</em></h2>
+    <div class="formula">
+      necessidade <span class="op">=</span> max(0, previsão_semanal <span class="op">×</span> semanas <span class="op">−</span> estoque_atual)
+      <span class="note">Ciclo padrão de 4 semanas · nunca se compra acima da necessidade</span>
+    </div>
+    <div class="metrics">
+      <div class="metric"><span class="v">146</span><span class="l">unidades a repor</span></div>
+      <div class="metric"><span class="v">R$ 1.475</span><span class="l">custo para cobrir 100%</span></div>
+      <div class="metric"><span class="v warn">R$ 1.000</span><span class="l">orçamento disponível</span></div>
+    </div>
+    <p class="foot">Faltam <strong>R$ 475,72</strong>. É esse buraco que o algoritmo genético precisa administrar.</p>
+  </section>
+
+  <!-- 07 -->
+  <section class="slide">
+    <p class="kicker">Etapa 04 · Por quê</p>
+    <h2>Por que algoritmo genético e <em>não</em> programação linear</h2>
+    <ul class="pts">
+      <li>Alocação de orçamento com objetivos múltiplos é um problema <strong>combinatório</strong></li>
+      <li>O AG aceita restrições <strong>não-lineares sem reformular</strong> o problema: desconto por volume, espaço de caminhão, validade de perecíveis</li>
+      <li>Com programação linear, cada uma dessas exigiria remodelar tudo de novo</li>
+    </ul>
+    <p class="foot">Honestidade técnica: neste cenário de 6 produtos, um algoritmo guloso simples também acharia o ótimo — e nós usamos esse fato como <strong>teste de validação</strong> do AG.</p>
+  </section>
+
+  <!-- 08 -->
+  <section class="slide">
+    <p class="kicker">O coração do projeto</p>
+    <h2>A função de <em>aptidão</em></h2>
+    <div class="formula">
+      fitness <span class="op">=</span> cobertura(%) <span class="op">×</span> 10 <span class="op">−</span> produtos_em_risco <span class="op">×</span> 5
+      <span class="note">Máximo teórico: 1000 — cobertura de 100% com zero produtos em risco</span>
+    </div>
+    <div class="duo">
+      <div class="card">
+        <h3>Recompensa</h3>
+        <p>Percentual da necessidade total atendido em unidades.</p>
+      </div>
+      <div class="card">
+        <h3>Penalidade</h3>
+        <p>Cada produto que segue desabastecido tira pontos.</p>
+      </div>
+    </div>
+    <p class="foot">A penalidade desempata: entre dois planos que cobrem o mesmo volume, preferimos o que deixa menos produtos zerados — porque em varejo, produto em falta custa cliente.</p>
+  </section>
+
+  <!-- 09 -->
+  <section class="slide">
+    <p class="kicker">Viabilidade</p>
+    <h2>Nenhuma solução inviável é <em>pontuada</em></h2>
+    <p class="wide">Em vez de punir quem estoura o orçamento, o operador de reparo conserta antes de avaliar:</p>
+    <ul class="pts" style="margin-top:1.2rem">
+      <li>Limita cada quantidade à <strong>necessidade real</strong> do produto</li>
+      <li>Enquanto o custo passar do orçamento, remove uma unidade do <strong>item mais caro</strong></li>
+    </ul>
+    <p class="foot">Remover o mais caro não é arbitrário: cada unidade removida custa exatamente <strong>uma</strong> unidade de cobertura, seja cara ou barata. Tirar a mais cara libera o máximo de orçamento perdendo o mínimo de cobertura.</p>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <p class="kicker">O ciclo evolutivo</p>
+    <h2>Seleção, cruzamento, mutação e <em>elitismo</em></h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Operador</th><th>Implementação</th><th class="n">Parâmetro</th></tr></thead>
+        <tbody>
+          <tr><td>População inicial</td><td>Quantidades aleatórias até a necessidade</td><td class="n">60</td></tr>
+          <tr><td>Seleção</td><td>Truncamento — os melhores viram pais</td><td class="n">20</td></tr>
+          <tr><td>Cruzamento</td><td>Uniforme, gene a gene</td><td class="n">50%</td></tr>
+          <tr><td>Mutação</td><td>Perturbação local de ±10 unidades</td><td class="n">20%</td></tr>
+          <tr class="accent"><td>Elitismo</td><td>Melhores passam intactos</td><td class="n">2</td></tr>
+          <tr><td>Gerações</td><td>Critério de parada</td><td class="n">100</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">O elitismo é o que garante que a solução <strong>nunca piora</strong> — por isso a curva de convergência só sobe.</p>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide">
+    <p class="kicker">Demonstração · Cenário A</p>
+    <h2>Solução ingênua <em>versus</em> algoritmo genético</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Indicador</th><th class="n">Divisão igual</th><th class="n">Algoritmo genético</th></tr></thead>
+        <tbody>
+          <tr><td>Orçamento utilizado</td><td class="n lo">R$ 314,32</td><td class="n hi">R$ 987,44</td></tr>
+          <tr><td>Demanda atendida</td><td class="n lo">24,7%</td><td class="n hi">82,2%</td></tr>
+          <tr><td>Produtos em risco</td><td class="n lo">2</td><td class="n hi">1</td></tr>
+          <tr class="accent"><td>Fitness</td><td class="n">236,58</td><td class="n hi">816,92</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">A divisão igual reserva dinheiro para arroz, feijão e detergente — que <strong>não precisavam de compra</strong> — gasta só R$ 314 e deixa o cliente sem leite e sem café.</p>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide">
+    <p class="kicker">Demonstração · Cenários B e C</p>
+    <h2>A regra de negócio é <em>parâmetro</em>, não código</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Configuração</th><th class="n">Produtos</th><th class="n">Cobertura</th><th class="n">Orçamento usado</th><th class="n">Fitness</th></tr></thead>
+        <tbody>
+          <tr><td>Ciclo 4 semanas · R$ 1.000</td><td class="n">2</td><td class="n">82,2%</td><td class="n">98,7%</td><td class="n">816,92</td></tr>
+          <tr><td>Ciclo 6 semanas · R$ 5.000</td><td class="n">5</td><td class="n">82,1%</td><td class="n">100,0%</td><td class="n">811,43</td></tr>
+          <tr class="accent"><td>Ciclo 6 semanas · R$ 7.725</td><td class="n">6</td><td class="n hi">99,8%</td><td class="n">99,6%</td><td class="n hi">993,45</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">Quando a cobertura chega a 100%, o sistema <strong>para de comprar</strong> — gastar o restante seria gerar o excesso que ele existe para evitar.</p>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide">
+    <p class="kicker">Demonstração · Cenário D</p>
+    <h2>Qualquer base padronizada, carregada <em>pela interface</em></h2>
+    <div class="metrics">
+      <div class="metric"><span class="v">60</span><span class="l">SKUs</span><span class="s">5 categorias de varejo</span></div>
+      <div class="metric"><span class="v">6.240</span><span class="l">registros</span><span class="s">2 anos de histórico</span></div>
+      <div class="metric"><span class="v">4,09</span><span class="l">MAE recalculado</span><span class="s">modelo retreinado na base</span></div>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Com orçamento de R$ 8.000</th><th class="n">Divisão igual</th><th class="n">Algoritmo genético</th></tr></thead>
+        <tbody>
+          <tr><td>Demanda atendida</td><td class="n lo">19,3%</td><td class="n hi">67,5%</td></tr>
+          <tr><td>Produtos em risco</td><td class="n lo">23</td><td class="n hi">13</td></tr>
+          <tr class="accent"><td>Fitness</td><td class="n">77,88</td><td class="n hi">610,09</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">Quanto mais produtos disputam o mesmo orçamento, <strong>mais valor a otimização entrega</strong>. É um problema combinatório — e é exatamente para isso que o algoritmo genético existe.</p>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide">
+    <p class="kicker">Arquitetura</p>
+    <h2>Processamento assíncrono e <em>tempo real</em></h2>
+    <div class="flow">
+      <div class="step"><span class="t">React · Vite</span><span class="d">Formulário, KPIs e gráficos</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="t">FastAPI</span><span class="d">REST e WebSocket</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="t">Redis</span><span class="d">Fila e canal de progresso</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="t">Celery</span><span class="d">Treina o modelo e roda o AG</span></div>
+    </div>
+    <p class="foot" style="margin-top:clamp(1.4rem,3vw,2.2rem)">O algoritmo genético leva segundos, então não pode bloquear a requisição HTTP. A API despacha a tarefa e devolve um identificador; o worker publica o progresso a cada dez gerações e a tela desenha a <strong>curva de convergência ao vivo</strong>.</p>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide">
+    <p class="kicker">Engenharia</p>
+    <h2>Quatro exigências, quatro <em>verificações automáticas</em></h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Exigência</th><th>Como foi cumprida</th><th>Verificada por</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SOLID</strong></td><td>Dependência externa sempre atrás de uma porta</td><td>14 interfaces</td></tr>
+          <tr><td><strong>Object Calisthenics</strong></td><td>As 9 regras no domínio, exceções justificadas</td><td>script no build</td></tr>
+          <tr><td><strong>Docker</strong></td><td>4 serviços + volumes de modelo e de bases</td><td>testes ponta a ponta</td></tr>
+          <tr><td><strong>Modularidade</strong></td><td>Domínio ← aplicação ← infraestrutura</td><td>3 contratos de importação</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot">O domínio — onde vivem a função fitness, o reparo e o AG — <strong>não importa</strong> FastAPI, Celery, Redis nem scikit-learn. Isso não é promessa: é contrato verificado no build.</p>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide">
+    <p class="kicker">O que foi construído</p>
+    <h2>Números do <em>projeto</em></h2>
+    <div class="metrics">
+      <div class="metric"><span class="v">128</span><span class="l">módulos Python</span><span class="s">61 de domínio puro</span></div>
+      <div class="metric"><span class="v">175</span><span class="l">testes automatizados</span><span class="s">145 backend · 30 frontend</span></div>
+      <div class="metric"><span class="v">96%</span><span class="l">cobertura do domínio</span><span class="s">onde está a regra de negócio</span></div>
+      <div class="metric"><span class="v">18</span><span class="l">decisões registradas</span><span class="s">arquitetura documentada</span></div>
+    </div>
+    <p class="foot" style="margin-top:clamp(1.6rem,3.4vw,2.6rem)">Tipagem estrita, contratos de importação e verificação de estilo rodam a cada build. Um pull request que viole qualquer uma das quatro exigências <strong>não passa</strong>.</p>
+  </section>
+
+  <!-- 17 -->
+  <section class="slide">
+    <p class="kicker">Honestidade</p>
+    <h2>O que este sistema <em>ainda não</em> faz</h2>
+    <ul class="pts">
+      <li>Usa <strong>preço de venda como custo de compra</strong> — simplificação assumida da prova de conceito</li>
+      <li>Não modela lead time de fornecedor, validade de perecíveis nem desconto por volume</li>
+      <li>Não tem autenticação nem múltiplos usuários</li>
+      <li>O dado de referência é simulado — ainda que o sistema já consuma base externa</li>
+    </ul>
+    <p class="foot">Cada um desses pontos está registrado como evolução prevista na documentação de decisões. Saber o que falta é parte da engenharia.</p>
+  </section>
+
+  <!-- 18 -->
+  <section class="slide">
+    <p class="kicker">Fechamento</p>
+    <p class="pull">Do histórico bruto de movimentações até uma decisão financeira de compra.</p>
+    <p class="foot" style="margin-top:clamp(1.6rem,3.4vw,2.6rem); font-size:clamp(.9rem,1.7vw,1.2rem)">
+      O Machine Learning previu. A Computação Evolutiva decidiu.<br>
+      E a arquitetura garante que trocar o modelo, a base ou a função de aptidão
+      é <strong>trocar uma peça</strong> — não reescrever o sistema.
+    </p>
+    <div class="who" style="margin-top:clamp(2rem,4.4vw,3.2rem); display:flex; flex-wrap:wrap; gap:.4rem 2rem; padding-top:clamp(1rem,2.4vw,1.8rem); border-top:1px solid var(--rule); font-size:clamp(.82rem,1.5vw,1.05rem); color:var(--muted)">
+      <span>Obrigado.</span><span>Perguntas?</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prevZone" aria-label="Slide anterior"></button>
+  <button id="nextZone" aria-label="Próximo slide"></button>
+</div>
+<div class="hud"><div class="bar" id="bar"></div></div>
+<p class="counter"><b id="cur">01</b> / <span id="tot">18</span></p>
+<p class="hint">← → navegar</p>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  var bar = document.getElementById('bar');
+  var cur = document.getElementById('cur');
+  document.getElementById('tot').textContent = String(slides.length).padStart(2,'0');
+
+  function render(){
+    slides.forEach(function(s,n){ s.classList.toggle('on', n === i); });
+    bar.style.width = ((i+1)/slides.length*100) + '%';
+    cur.textContent = String(i+1).padStart(2,'0');
+    try{ location.hash = String(i+1); }catch(e){}
+  }
+  function go(step){
+    var next = i + step;
+    if(next < 0 || next >= slides.length) return;
+    i = next; render();
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(1); }
+    if(e.key === 'ArrowLeft'  || e.key === 'PageUp'){ e.preventDefault(); go(-1); }
+    if(e.key === 'Home'){ e.preventDefault(); i = 0; render(); }
+    if(e.key === 'End'){ e.preventDefault(); i = slides.length-1; render(); }
+  });
+  document.getElementById('nextZone').addEventListener('click', function(){ go(1); });
+  document.getElementById('prevZone').addEventListener('click', function(){ go(-1); });
+
+  var start = parseInt((location.hash||'').replace('#',''),10);
+  if(start >= 1 && start <= slides.length) i = start - 1;
+  render();
+})();
+</script>

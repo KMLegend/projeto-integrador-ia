@@ -1,0 +1,551 @@
+<title>Roteiro de Apoio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+
+<style>
+:root{
+  --paper:#F6F7F5; --surface:#FFFFFF; --ink:#14201D; --ink-soft:#44544F;
+  --muted:#6B7A76; --rule:#DDE3E0; --rule-soft:#EAEEEC;
+  --accent:#116352; --accent-soft:#E6F0ED; --accent-ink:#0C4A3E;
+  --signal:#A8501B; --signal-soft:#F7EDE4;
+  --mark:#1F3D36;
+  --shadow:0 1px 2px rgba(20,32,29,.05), 0 8px 24px rgba(20,32,29,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#101614; --surface:#172220; --ink:#E7EDEA; --ink-soft:#AEBDB8;
+    --muted:#8A9A95; --rule:#2A3936; --rule-soft:#212E2B;
+    --accent:#56B49F; --accent-soft:#1A2E2A; --accent-ink:#8BD2C0;
+    --signal:#D48A54; --signal-soft:#2B211A;
+    --mark:#9FD3C6;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101614; --surface:#172220; --ink:#E7EDEA; --ink-soft:#AEBDB8;
+  --muted:#8A9A95; --rule:#2A3936; --rule-soft:#212E2B;
+  --accent:#56B49F; --accent-soft:#1A2E2A; --accent-ink:#8BD2C0;
+  --signal:#D48A54; --signal-soft:#2B211A;
+  --mark:#9FD3C6;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:60rem; margin:0 auto; padding:3rem 1.5rem 6rem}
+
+/* ---------- cabeçalho ---------- */
+.masthead{border-bottom:2px solid var(--ink); padding-bottom:1.75rem; margin-bottom:2.5rem}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.72rem; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 .85rem
+}
+h1{
+  font-family:Newsreader,Georgia,serif; font-weight:500; font-size:clamp(2.1rem,5vw,3.1rem);
+  line-height:1.08; letter-spacing:-.015em; margin:0 0 .6rem; text-wrap:balance
+}
+.dek{font-size:1.05rem; color:var(--ink-soft); margin:0 0 1.6rem; max-width:52ch}
+.facts{display:flex; flex-wrap:wrap; gap:.5rem 2.25rem; margin:0; padding:0; list-style:none}
+.facts div{display:flex; flex-direction:column; gap:.1rem}
+.facts dt{
+  font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted)
+}
+.facts dd{margin:0; font-size:.92rem; font-weight:500}
+
+/* ---------- seções ---------- */
+section{margin:3.25rem 0 0}
+h2{
+  font-family:Newsreader,Georgia,serif; font-weight:500; font-size:1.75rem; line-height:1.2;
+  margin:0 0 .35rem; letter-spacing:-.01em; text-wrap:balance
+}
+h2 .num{
+  font-family:"IBM Plex Mono",monospace; font-size:.8rem; font-weight:500; color:var(--accent);
+  letter-spacing:.1em; display:block; margin-bottom:.3rem
+}
+.lead{color:var(--ink-soft); margin:0 0 1.5rem; max-width:62ch}
+h3{font-size:1rem; font-weight:600; margin:1.75rem 0 .5rem; letter-spacing:-.005em}
+p{margin:0 0 .9rem; max-width:68ch}
+a{color:var(--accent-ink)}
+
+/* ---------- blocos cronometrados ---------- */
+.block{
+  display:grid; grid-template-columns:5.5rem 1fr; gap:0 1.5rem;
+  border-top:1px solid var(--rule); padding:1.6rem 0
+}
+.block:last-of-type{border-bottom:1px solid var(--rule)}
+.clock{display:flex; flex-direction:column; gap:.25rem; padding-top:.15rem}
+.clock .t{
+  font-family:"IBM Plex Mono",monospace; font-size:1.05rem; font-weight:600;
+  color:var(--mark); font-variant-numeric:tabular-nums; letter-spacing:-.02em
+}
+.clock .dur{font-family:"IBM Plex Mono",monospace; font-size:.7rem; color:var(--muted); letter-spacing:.06em}
+.block h3{margin:0 0 .6rem; font-size:1.18rem; font-family:Newsreader,Georgia,serif; font-weight:600; letter-spacing:-.01em}
+.say{border-left:2px solid var(--accent); padding:.1rem 0 .1rem 1rem; margin:0 0 1rem; max-width:64ch}
+.say p{margin:0 0 .6rem}
+.say p:last-child{margin:0}
+.show{
+  display:flex; gap:.7rem; align-items:flex-start; background:var(--rule-soft);
+  border-radius:3px; padding:.7rem .9rem; margin:.9rem 0; font-size:.9rem; max-width:64ch
+}
+.show b{
+  font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--muted); white-space:nowrap; padding-top:.18rem
+}
+
+/* ---------- caixas ---------- */
+.check{
+  background:var(--accent-soft); border:1px solid var(--rule); border-left:3px solid var(--accent);
+  border-radius:3px; padding:1rem 1.15rem; margin:1.1rem 0; max-width:64ch
+}
+.check .hd{
+  font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--accent-ink); font-weight:600; margin-bottom:.55rem
+}
+.check ul{margin:0; padding-left:1.1rem}
+.check li{margin:.2rem 0; font-size:.92rem}
+.warn{
+  background:var(--signal-soft); border:1px solid var(--rule); border-left:3px solid var(--signal);
+  border-radius:3px; padding:1rem 1.15rem; margin:1.1rem 0; max-width:64ch; font-size:.93rem
+}
+.warn .hd{
+  font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.11em;
+  text-transform:uppercase; color:var(--signal); font-weight:600; margin-bottom:.45rem
+}
+.warn p{margin:0 0 .5rem}
+.warn p:last-child{margin:0}
+
+/* ---------- código ---------- */
+code{
+  font-family:"IBM Plex Mono",monospace; font-size:.86em; background:var(--rule-soft);
+  padding:.1em .35em; border-radius:2px
+}
+pre{
+  font-family:"IBM Plex Mono",monospace; font-size:.83rem; line-height:1.6;
+  background:var(--surface); border:1px solid var(--rule); border-radius:3px;
+  padding:.85rem 1rem; overflow-x:auto; margin:.8rem 0; box-shadow:var(--shadow)
+}
+pre code{background:none; padding:0; font-size:1em}
+
+/* ---------- tabelas ---------- */
+.tscroll{overflow-x:auto; margin:1rem 0; border:1px solid var(--rule); border-radius:3px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.88rem}
+th,td{padding:.6rem .8rem; text-align:left; border-bottom:1px solid var(--rule-soft)}
+thead th{
+  font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); font-weight:500;
+  border-bottom:1px solid var(--rule); white-space:nowrap
+}
+tbody tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right; font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+td strong{color:var(--mark)}
+
+/* ---------- FAQ ---------- */
+.faq{display:flex; flex-direction:column; gap:1.3rem; margin-top:1.2rem}
+.faq .q{font-weight:600; margin:0 0 .35rem; color:var(--mark); max-width:66ch}
+.faq .a{margin:0; color:var(--ink-soft); max-width:68ch}
+
+footer{
+  margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--rule);
+  font-size:.82rem; color:var(--muted)
+}
+@media (max-width:640px){
+  .wrap{padding:2rem 1.1rem 4rem}
+  .block{grid-template-columns:1fr; gap:.5rem}
+  .clock{flex-direction:row; align-items:baseline; gap:.6rem}
+}
+@media print{
+  body{background:#fff} .block{break-inside:avoid} pre,.check,.warn{break-inside:avoid}
+}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">ANEXO · roteiro longo de apoio — o oficial é etapa_09_roteiro_demo.md</p>
+  <h1>Gestão Preditiva de Estoque com Inteligência Artificial</h1>
+  <p class="dek">Roteiro de apresentação à banca: o que dizer, o que mostrar e quais números conferir na tela, bloco a bloco.</p>
+  <dl class="facts">
+    <div><dt>Duração</dt><dd>20 min + arguição</dd></div>
+    <div><dt>Integrantes</dt><dd>Carlos Eduardo · Adryan Kevin · Eduardo Mendonça · Gabriel · Kevin Maykel</dd></div>
+    <div><dt>Demonstração</dt><dd>Sistema rodando em Docker</dd></div>
+  </dl>
+</header>
+
+<section>
+  <h2><span class="num">Antes de entrar</span>Checklist de 5 minutos</h2>
+  <p class="lead">Faça isso com a sala ainda vazia. Se algum passo falhar, você ainda tem tempo de cair no plano B da última seção.</p>
+
+  <pre><code># 1. subir os quatro serviços
+docker compose up -d
+
+# 2. pré-treinar o modelo (evita espera no primeiro clique)
+docker compose --profile tools run --rm model_trainer
+
+# 3. conferir que a API responde
+curl http://localhost:8000/health</code></pre>
+
+  <div class="check">
+    <div class="hd">Confira antes de começar</div>
+    <ul>
+      <li><code>docker compose ps</code> mostra os 4 serviços, com <code>api_backend</code> e <code>celery_worker</code> em <em>healthy</em>.</li>
+      <li><code>http://localhost:5173</code> abre o formulário com o seletor <strong>Base de Dados</strong> preenchido.</li>
+      <li>O arquivo <code>doc-projeto/dataset_exemplo_60skus.csv</code> está à mão para o upload ao vivo.</li>
+      <li>Rode uma otimização de teste e <strong>feche a aba</strong> — assim o modelo já está em cache.</li>
+    </ul>
+  </div>
+
+  <div class="warn">
+    <div class="hd">Atenção</div>
+    <p>Não edite arquivos do frontend com o Vite rodando durante a apresentação: o <em>hot reload</em> pode quebrar a ordem dos hooks do React e derrubar a página. Se acontecer, um <code>F5</code> resolve.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Parte I · 0:00 – 7:00</span>Do problema ao algoritmo</h2>
+  <p class="lead">Quatro blocos de narrativa antes de tocar no sistema. O objetivo é que, quando a tela aparecer, a banca já saiba exatamente o que está vendo.</p>
+
+  <div class="block">
+    <div class="clock"><span class="t">0:00</span><span class="dur">2 min</span></div>
+    <div>
+      <h3>O dilema de quem compra estoque</h3>
+      <div class="say">
+        <p>“Todo gestor de estoque vive entre dois custos. Se comprar de menos, falta produto na gôndola: perde a venda e, muitas vezes, o cliente. Se comprar demais, imobiliza capital de giro em mercadoria parada, paga armazenagem e corre risco de perda.”</p>
+        <p>“O que torna isso difícil não é saber que existe esse equilíbrio — é que o dinheiro disponível quase nunca cobre tudo que precisa ser reposto. É aí que entra a inteligência artificial deste projeto.”</p>
+      </div>
+      <div class="show"><b>Mostrar</b><span>Slide do problema. Nada de sistema ainda.</span></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">2:00</span><span class="dur">2 min</span></div>
+    <div>
+      <h3>O fio condutor: dado → previsão → decisão</h3>
+      <div class="say">
+        <p>“O projeto não são entregas soltas. É um único fluxo. A Etapa 02 definiu quais dados descrevem a situação de um produto. A Etapa 03 treinou um modelo que, a partir desses dados, prevê quanto vai sair na próxima semana. A Etapa 04 usa essa previsão para decidir o que comprar dentro de um orçamento fixo.”</p>
+        <p>“Machine Learning é o sensor: ele diz o que vai acontecer. Computação Evolutiva é o motor de decisão: ele diz o que fazer a respeito.”</p>
+      </div>
+      <div class="show"><b>Mostrar</b><span>Diagrama do fluxo: histórico → previsão semanal → necessidade do ciclo → plano de compra.</span></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">4:00</span><span class="dur">1,5 min</span></div>
+    <div>
+      <h3>Etapa 03 — a previsão de demanda</h3>
+      <div class="say">
+        <p>“A variável que queremos prever é uma quantidade contínua, então o problema é de regressão, não de classificação. Usamos regressão linear por mínimos quadrados — o mesmo conteúdo de sistemas lineares visto em Matemática para IA.”</p>
+        <p>“Escolhemos regressão linear por decisão de projeto, não por limitação: uma prova de conceito precisa de um modelo auditável, em que cada coeficiente é explicável. O erro médio absoluto ficou em <strong>4,76 unidades por semana</strong> — para itens que vendem de 30 a 100 unidades, é um erro pequeno e fácil de comunicar a um gestor.”</p>
+      </div>
+      <div class="show"><b>Mostrar</b><span>Tabela das 5 features e o valor do MAE.</span></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">5:30</span><span class="dur">1,5 min</span></div>
+    <div>
+      <h3>A ponte: de quanto vai vender para quanto preciso comprar</h3>
+      <div class="say">
+        <p>“A previsão sozinha não compra nada. Precisamos de três regras de negócio. Primeira: o gestor compra para cobrir um ciclo de quatro semanas. Segunda: a necessidade líquida é a demanda do ciclo menos o que já existe em estoque, nunca negativa. Terceira: jamais se compra acima dessa necessidade — comprar a mais é exatamente o excesso que o sistema existe para evitar.”</p>
+        <p>“Aplicando isso aos seis produtos, dá <strong>146 unidades</strong> a repor, custando <strong>R$ 1.475,72</strong>. E o orçamento da simulação é de <strong>R$ 1.000</strong>. Faltam R$ 475,72 — e é esse buraco que o algoritmo genético precisa administrar.”</p>
+      </div>
+      <div class="show"><b>Mostrar</b><span>Tabela do cenário: estoque, previsão, demanda do ciclo e necessidade por produto.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Parte II · 7:00 – 11:00</span>A função fitness e o algoritmo genético</h2>
+  <p class="lead">O coração da entrega de Computação Evolutiva. Vale gastar tempo aqui — é o bloco em que a banca mais aprofunda.</p>
+
+  <div class="block">
+    <div class="clock"><span class="t">7:00</span><span class="dur">2 min</span></div>
+    <div>
+      <h3>Como o algoritmo sabe que uma compra é boa</h3>
+      <div class="say">
+        <p>“Cada solução candidata é um vetor com a quantidade a comprar de cada produto. Para o algoritmo comparar duas soluções, ele precisa de uma nota. Essa nota é a função de aptidão.”</p>
+        <p>“Ela tem duas forças. A recompensa principal é a <em>cobertura</em>: o percentual da necessidade total atendido em unidades. A penalidade é o <em>número de produtos que seguem desabastecidos</em>. A penalidade existe para desempatar: entre dois planos que cobrem o mesmo volume, preferimos o que deixa menos produtos zerados na prateleira — porque em varejo um produto em falta custa cliente, independentemente de quantas unidades faltaram.”</p>
+      </div>
+      <pre><code>fitness = cobertura(%) × 10  −  produtos_em_risco × 5
+
+Máximo teórico: 1000  (cobertura 100%, zero produtos em risco)</code></pre>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">9:00</span><span class="dur">1 min</span></div>
+    <div>
+      <h3>O operador de reparo — por que nenhuma solução inviável é avaliada</h3>
+      <div class="say">
+        <p>“Em vez de punir soluções que estouram o orçamento, nós as consertamos antes de pontuar. O reparo faz duas coisas: limita cada quantidade à necessidade real do produto e, enquanto o custo passar do orçamento, remove uma unidade do item mais caro.”</p>
+        <p>“Remover o mais caro não é arbitrário. Cada unidade removida custa exatamente uma unidade de cobertura, seja ela cara ou barata — então tirar a mais cara libera o máximo de orçamento perdendo o mínimo de cobertura. O reparo é aplicado em quatro pontos: na criação, no cruzamento, na mutação e em qualquer plano vindo de fora.”</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">10:00</span><span class="dur">1 min</span></div>
+    <div>
+      <h3>O ciclo evolutivo</h3>
+      <div class="say">
+        <p>“Começamos com 60 planos aleatórios. A cada geração: ordenamos pela aptidão, os 20 melhores viram o grupo de pais, os 2 melhores passam intactos — isso é o elitismo, e é o que garante que a solução nunca piora — e o restante da população nasce de cruzamento uniforme seguido de mutação com 20% de probabilidade. Repetimos 100 vezes.”</p>
+      </div>
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>Operador</th><th>Implementação</th><th class="n">Parâmetro</th></tr></thead>
+          <tbody>
+            <tr><td>População inicial</td><td>Quantidades aleatórias entre 0 e a necessidade</td><td class="n">60</td></tr>
+            <tr><td>Seleção</td><td>Truncamento — os melhores viram pais</td><td class="n">20</td></tr>
+            <tr><td>Cruzamento</td><td>Uniforme, gene a gene</td><td class="n">50%</td></tr>
+            <tr><td>Mutação</td><td>Perturbação local de ±10 unidades</td><td class="n">20%</td></tr>
+            <tr><td>Elitismo</td><td>Melhores sobrevivem sem alteração</td><td class="n">2</td></tr>
+            <tr><td>Gerações</td><td>Critério de parada fixo</td><td class="n">100</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="check">
+        <div class="hd">Use isto se perguntarem se o AG realmente acha a melhor resposta</div>
+        <ul>
+          <li>Neste cenário é possível provar o ótimo global por força bruta: <strong>fitness 816,92</strong>.</li>
+          <li>O AG chega exatamente nesse valor, e há um teste automatizado comparando o resultado do AG com um algoritmo guloso ótimo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Parte III · 11:00 – 17:00</span>Demonstração ao vivo</h2>
+  <p class="lead">Quatro cenários em ordem crescente de impacto. Se o tempo apertar, corte o cenário B — nunca o A nem o D.</p>
+
+  <div class="block">
+    <div class="clock"><span class="t">11:00</span><span class="dur">1,5 min</span></div>
+    <div>
+      <h3>Cenário A — reproduzindo o notebook</h3>
+      <div class="say">
+        <p>“Primeiro, a prova de que o sistema faz exatamente o que o notebook fazia. Mesmo cenário, mesmo orçamento, mesma semente.”</p>
+      </div>
+      <div class="show"><b>Fazer</b><span>Base de Dados <code>historico_mensal_v1</code> · Orçamento <code>1000</code> · Ciclo <code>4</code> · População <code>60</code> · Gerações <code>100</code> → <strong>Otimizar</strong></span></div>
+      <div class="check">
+        <div class="hd">Confira na tela</div>
+        <ul>
+          <li>Custo <strong>R$ 987,44</strong> — 98,7% do orçamento</li>
+          <li>Atendimento <strong>82,2%</strong> — 120 de 146 unidades</li>
+          <li><strong>1 produto</strong> em risco · Fitness <strong>816,92</strong> · Erro do modelo <strong>± 4,76</strong></li>
+          <li>Comparativo: baseline 24,7% e fitness 236,58 contra 82,2% e 816,92 do AG</li>
+        </ul>
+      </div>
+      <div class="say">
+        <p>“A solução ingênua divide o orçamento igualmente entre os seis produtos. Ela reserva dinheiro para arroz, feijão e detergente, que não precisavam de compra, e gasta só R$ 314 — deixando o cliente sem leite e sem café. O algoritmo genético usa 98,7% do orçamento exatamente onde havia falta.”</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">12:30</span><span class="dur">1,5 min</span></div>
+    <div>
+      <h3>Cenário B — mudando a regra de negócio</h3>
+      <div class="say">
+        <p>“O ciclo de reposição é parâmetro, não constante no código. Se o gestor quiser cobrir seis semanas em vez de quatro, a necessidade cresce e mais produtos entram na disputa.”</p>
+      </div>
+      <div class="show"><b>Fazer</b><span>Orçamento <code>5000</code> · Ciclo <code>6</code> → <strong>Otimizar</strong></span></div>
+      <div class="check">
+        <div class="hd">Confira na tela</div>
+        <ul>
+          <li><strong>5 produtos</strong> no plano, contra 2 no cenário anterior</li>
+          <li>Custo <strong>R$ 4.998,78</strong> — <strong>100,0%</strong> do orçamento</li>
+          <li>Atendimento 82,1% · 2 em risco · Fitness <strong>811,43</strong> (baseline 489,32)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">14:00</span><span class="dur">1 min</span></div>
+    <div>
+      <h3>Cenário C — quando o orçamento deixa de apertar</h3>
+      <div class="say">
+        <p>“Com orçamento suficiente, o algoritmo cobre tudo e para. Ele não compra além da necessidade, porque isso seria gerar o excesso que o sistema existe para evitar.”</p>
+      </div>
+      <div class="show"><b>Fazer</b><span>Orçamento <code>7725</code> · Ciclo <code>6</code> → <strong>Otimizar</strong></span></div>
+      <div class="check">
+        <div class="hd">Confira na tela</div>
+        <ul>
+          <li><strong>Os 6 produtos</strong> no plano · Atendimento <strong>99,8%</strong> · Fitness <strong>993,45</strong></li>
+          <li>Baseline no mesmo orçamento: 75,6% e 4 produtos em risco</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">15:00</span><span class="dur">2 min</span></div>
+    <div>
+      <h3>Cenário D — carregando uma base real pela interface</h3>
+      <div class="say">
+        <p>“Até aqui usamos a base simulada de seis produtos. Mas o sistema aceita qualquer base padronizada. Vou carregar agora uma com sessenta produtos e dois anos de histórico.”</p>
+      </div>
+      <div class="show"><b>Fazer</b><span><strong>Enviar CSV</strong> → <code>doc-projeto/dataset_exemplo_60skus.csv</code> · Orçamento <code>8000</code> · Ciclo <code>4</code> → <strong>Otimizar</strong></span></div>
+      <div class="check">
+        <div class="hd">Confira na tela</div>
+        <ul>
+          <li>O seletor passa a mostrar <strong>6240 registros, 60 SKUs</strong></li>
+          <li><strong>18 produtos</strong> no plano · Custo <strong>R$ 7.993,30</strong> — 99,9% do orçamento</li>
+          <li>Atendimento <strong>67,5%</strong> (1.764 de 2.613 un.) · 13 em risco · Fitness <strong>610,09</strong></li>
+          <li>Baseline: <strong>19,3%</strong> de cobertura e <strong>23</strong> produtos em risco — fitness 77,88</li>
+          <li>Erro do modelo muda para <strong>± 4,09</strong>: o modelo foi <em>retreinado</em> nesta base</li>
+        </ul>
+      </div>
+      <div class="say">
+        <p>“Repare em dois detalhes. O erro do modelo mudou, porque cada base treina o seu próprio modelo. E a diferença contra a solução ingênua explodiu: de 19% para 67% de cobertura, de 23 produtos desabastecidos para 13. Quanto mais produtos disputam o mesmo orçamento, mais valor a otimização entrega — é um problema combinatório, e é exatamente para isso que o algoritmo genético existe.”</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">17:00</span><span class="dur">30 s</span></div>
+    <div>
+      <h3>Enquanto roda: a curva de convergência</h3>
+      <div class="say">
+        <p>“O gráfico que vocês veem sendo desenhado vem de um WebSocket: o worker publica o progresso a cada dez gerações e a tela acompanha em tempo real. A curva nunca desce — isso é o elitismo em ação.”</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Parte IV · 17:00 – 20:00</span>A engenharia por trás</h2>
+  <p class="lead">O diferencial técnico da entrega. Encadeie: cada exigência tem um critério objetivo, e cada critério é verificado por ferramenta — não por opinião.</p>
+
+  <div class="block">
+    <div class="clock"><span class="t">17:30</span><span class="dur">1,5 min</span></div>
+    <div>
+      <h3>Quatro exigências, quatro verificações automáticas</h3>
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>Exigência</th><th>Como foi cumprida</th><th>Como é verificada</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SOLID</strong></td><td>Toda dependência externa atrás de uma porta; composição em um único arquivo</td><td><code>lint-imports</code> · 14 portas</td></tr>
+            <tr><td><strong>Object Calisthenics</strong></td><td>As 9 regras no domínio; exceções justificadas por comentário</td><td><code>check_calisthenics.sh</code></td></tr>
+            <tr><td><strong>Docker</strong></td><td>4 serviços + volumes de modelo e de bases</td><td>10 critérios em testes e2e</td></tr>
+            <tr><td><strong>Modularidade</strong></td><td>Domínio ← aplicação ← infraestrutura</td><td>3 contratos de importação</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="say">
+        <p>“O ponto central é este: o domínio — onde vivem a função fitness, o reparo e o algoritmo genético — não importa FastAPI, nem Celery, nem Redis, nem scikit-learn. Ele poderia rodar num script de linha de comando sem alterar uma linha. Isso não é promessa: é um contrato verificado no build.”</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="clock"><span class="t">19:00</span><span class="dur">1 min</span></div>
+    <div>
+      <h3>Fechamento</h3>
+      <div class="say">
+        <p>“Fechamos o ciclo que abrimos: do histórico bruto de movimentações até uma decisão financeira de compra. O Machine Learning previu, a Computação Evolutiva decidiu, e a arquitetura garante que trocar o modelo, a base ou a função de aptidão é trocar uma peça — não reescrever o sistema.”</p>
+      </div>
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>Dimensão</th><th class="n">Número</th></tr></thead>
+          <tbody>
+            <tr><td>Módulos Python (<code>src</code>)</td><td class="n">128</td></tr>
+            <tr><td>Módulos de domínio puro</td><td class="n">61</td></tr>
+            <tr><td>Portas (interfaces)</td><td class="n">14</td></tr>
+            <tr><td>Testes automatizados</td><td class="n">145 + 30</td></tr>
+            <tr><td>Cobertura do domínio</td><td class="n">96%</td></tr>
+            <tr><td>Decisões de arquitetura registradas</td><td class="n">18</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Arguição</span>Perguntas prováveis da banca</h2>
+  <p class="lead">Respostas curtas, com o dado concreto na frente. Admitir limitação com clareza vale mais que defender o indefensável.</p>
+
+  <div class="faq">
+    <div><p class="q">Por que algoritmo genético e não programação linear?</p>
+    <p class="a">Porque o AG aceita restrições não-lineares sem reformular o problema: desconto por volume, espaço de caminhão, validade de perecíveis. Com programação linear, cada uma dessas exigiria remodelar tudo. Neste cenário de seis produtos, um guloso simples também acharia o ótimo — e usamos esse fato como teste de validação do AG. O que justifica o AG é a extensibilidade e o crescimento do problema com o número de SKUs.</p></div>
+
+    <div><p class="q">Por que regressão linear e não XGBoost ou rede neural?</p>
+    <p class="a">Decisão de projeto. A prova de conceito pedia interpretabilidade: cada coeficiente é auditável e explicável. O MAE de 4,76 unidades mostrou aderência suficiente. E trocar o modelo não exige mudar nenhuma outra camada — ele está atrás de uma interface.</p></div>
+
+    <div><p class="q">Os dados são simulados. Isso invalida o resultado?</p>
+    <p class="a">Não para os fins desta prova de conceito. A estrutura respeita o padrão de um ERP de varejo, e acabamos de demonstrar o sistema consumindo uma base externa de 60 produtos carregada pela interface. O fluxo é o mesmo quando o dado real entrar.</p></div>
+
+    <div><p class="q">Por que o fitness usa os pesos 10 e 5?</p>
+    <p class="a">São parâmetros de política, não constantes no código — ficam num objeto de configuração. O 10 escala a cobertura percentual para dominar a nota; o 5 é um desempate que favorece concentrar a compra e deixar menos produtos zerados. Mudar os pesos é mudar uma linha, e o sistema aceita políticas de aptidão alternativas sem tocar no algoritmo.</p></div>
+
+    <div><p class="q">Por que o orçamento sobra em alguns cenários?</p>
+    <p class="a">Porque o sistema não compra acima da necessidade do ciclo. Quando a cobertura chega a 100%, não há mais o que comprar — gastar o resto seria gerar excesso de estoque, exatamente o custo que queremos evitar.</p></div>
+
+    <div><p class="q">O que acontece se eu subir um CSV com o formato errado?</p>
+    <p class="a">A requisição é recusada na borda com HTTP 422 e uma mensagem dizendo quais colunas faltam e em qual linha o valor é inválido. Nada é persistido. Colunas extras são aceitas e ignoradas.</p></div>
+
+    <div><p class="q">Isso está pronto para produção?</p>
+    <p class="a">Não, e sabemos exatamente o que falta: dado real de ERP com volume maior, preço de venda separado do custo de compra, lead time de fornecedor, validade de perecíveis e autenticação. Estão registrados como evolução prevista na documentação de decisões.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Contingência</span>Plano B</h2>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Se acontecer</th><th>Faça</th></tr></thead>
+      <tbody>
+        <tr><td>A tela não carrega</td><td><code>docker compose restart frontend</code> e recarregue. Enquanto isso, narre o slide do cenário.</td></tr>
+        <tr><td>A otimização não conclui</td><td><code>docker compose logs celery_worker --tail=20</code>. Caso persista, mostre o resultado pré-gravado.</td></tr>
+        <tr><td>O upload falha</td><td>Siga com a base embutida e explique o schema exigido pela tela “Ver colunas obrigatórias”.</td></tr>
+        <tr><td>Docker indisponível</td><td>Apresente pelo notebook <code>Projeto_Preditivo.ipynb</code> — os números são os mesmos do cenário A.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="warn">
+    <div class="hd">Regra de ouro</div>
+    <p>Tenha capturas de tela dos quatro cenários salvas localmente. Se a demonstração ao vivo falhar, a apresentação continua sem perder o fio.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Cola</span>Números que você não pode errar</h2>
+  <div class="tscroll">
+    <table>
+      <thead>
+        <tr><th>Cenário</th><th class="n">Custo</th><th class="n">Cobertura</th><th class="n">Risco</th><th class="n">Fitness</th><th class="n">Baseline</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>A</strong> · R$ 1.000 · ciclo 4</td><td class="n">987,44</td><td class="n">82,2%</td><td class="n">1</td><td class="n">816,92</td><td class="n">236,58</td></tr>
+        <tr><td><strong>B</strong> · R$ 5.000 · ciclo 6</td><td class="n">4.998,78</td><td class="n">82,1%</td><td class="n">2</td><td class="n">811,43</td><td class="n">489,32</td></tr>
+        <tr><td><strong>C</strong> · R$ 7.725 · ciclo 6</td><td class="n">7.695,20</td><td class="n">99,8%</td><td class="n">1</td><td class="n">993,45</td><td class="n">736,21</td></tr>
+        <tr><td><strong>D</strong> · 60 SKUs · R$ 8.000</td><td class="n">7.993,30</td><td class="n">67,5%</td><td class="n">13</td><td class="n">610,09</td><td class="n">77,88</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Conceito</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td>Função de aptidão</td><td><code>cobertura(%) × 10 − produtos_em_risco × 5</code></td></tr>
+        <tr><td>Necessidade líquida</td><td><code>max(0, previsão_semanal × semanas − estoque_atual)</code></td></tr>
+        <tr><td>Classificação de risco</td><td>abaixo da previsão = falta · acima de 1,8× = excesso</td></tr>
+        <tr><td>Erro do modelo</td><td>4,76 un./semana na base embutida · 4,09 na base de 60 SKUs</td></tr>
+        <tr><td>Necessidade do cenário base</td><td>146 unidades · R$ 1.475,72 para cobrir 100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  Roteiro gerado a partir do sistema em execução — todos os números foram medidos, não estimados.
+  Base técnica completa em <code>.context/</code>; decisões de arquitetura em <code>01-divergencias-e-decisoes.md</code>.
+</footer>
+
+</div>

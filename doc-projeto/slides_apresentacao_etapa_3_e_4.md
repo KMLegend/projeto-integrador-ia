@@ -1,7 +1,7 @@
 # Gestão Preditiva de Estoque com Inteligência Artificial
 ## Prova de Conceito: Machine Learning Clássico & Otimização Evolutiva
 **Projeto Integrador IV · Gestão de TI com Ênfase em IA**  
-**Integrantes:** Carlos Eduardo, Adryan Kevin, Eduardo Mendonça e Gabriel  
+**Integrantes:** Carlos Eduardo, Adryan Kevin, Eduardo Mendonça, Gabriel e Kevin Maykel  
 **Entrega:** Etapas 03 e 04
 
 ---

@@ -78,6 +78,23 @@ atualizado: 2026-10-14
 
 ---
 
+### Entregáveis acadêmicos (fora de `.context/`, em `doc-projeto/`)
+
+| Arquivo | Etapa | Conteúdo |
+|---|---|---|
+| `etapa_06_rodada1_na_mao.md` | Ativ. 06 | Rodada 1: funcionalidade, decisões técnicas, tempo |
+| `etapa_07_rodada2_prompt.md` | Ativ. 07 | Rodada 2: prompts usados e onde o agente errou |
+| `etapa_08_comparacao_rodadas.md` | Ativ. 08 | Comparação objetiva e nota conclusiva |
+| `etapa_08_equivalencia.py` | Ativ. 08 | Prova executável: as duas rodadas dão 816,9178 |
+| `etapa_09_slides.pptx` | Etapa 09 | **5 slides** — o máximo que o roteiro permite |
+| `etapa_09_roteiro_demo.md` | Etapa 09 | Roteiro da apresentação e da demonstração ao vivo |
+
+> O roteiro oficial (`ROTEIRO_PI_IV.docx`) limita a apresentação final a **5 slides**.
+> Os decks de 18 slides em `doc-projeto/slides_apresentacao.*` são **material de apoio**
+> para arguição — não devem ser entregues como a apresentação.
+
+---
+
 ## 3. Restrições não-negociáveis do projeto
 
 Estas quatro exigências valem para **todo** o código produzido. Um entregável que as viole deve ser recusado em revisão.
